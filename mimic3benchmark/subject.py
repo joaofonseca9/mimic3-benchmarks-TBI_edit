@@ -22,6 +22,39 @@ def read_stays(subject_path):
 def read_diagnoses(subject_path):
     return dataframe_from_csv(os.path.join(subject_path, 'diagnoses.csv'), index_col=None)
 
+def get_TBI_ICD9():
+    skull_fract=[80000, 80001, 80002, 80003, 80004, 80005, 80006, 80009, 80010, 80011,
+             80012, 80013, 80014, 80015, 80016, 80019, 80020, 80021, 80022, 80023, 
+             80024, 80025, 80026, 80029, 80030, 80031, 80032, 80033, 80034, 80035, 
+             80036, 80039, 80040, 80041, 80042, 80043, 80044, 80045, 80046, 80049, 
+             80050, 80051, 80052, 80053, 80054, 80055, 80059, 80060, 80061, 80062, 
+             80063, 80064, 80065, 80066, 80069, 80070, 80071, 80072, 80073, 80074, 
+             80075, 80076, 80079, 80080, 80081, 80082, 80083, 80084, 80085, 80086, 
+             80089, 80090, 80091, 80092, 80093, 80094, 80095, 80096, 80099]
+
+    concussion=np.array(skull_fract)+100
+    concussion=list(concussion)
+
+    cerebral_contusion=[8502,8503,8504,8505,8509]
+    cerebral_contusion.extend(list(np.array(skull_fract)+5000))
+
+    #traumatic subarachnoid hemorrahges, subdurals and extradurals
+    hemorrahges=list(np.array(skull_fract)+5200)
+
+    #other hemorrahges
+    hemorrahges2=list(np.array(skull_fract)+5300)
+
+    #intracranial injury of unspecified nature
+    cran_injury=list(np.array(skull_fract)+5400)
+
+    #subdurals + extra/epidurals
+    subdurals=[4320,4321]
+
+    TBI_ICD9=[skull_fract, concussion, cerebral_contusion, hemorrahges, hemorrahges2,
+            cran_injury, subdurals]
+
+    return TBI_ICD9
+
 
 def read_events(subject_path, remove_null=True):
     events = dataframe_from_csv(os.path.join(subject_path, 'events.csv'), index_col=None)
