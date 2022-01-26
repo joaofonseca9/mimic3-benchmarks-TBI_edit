@@ -6,6 +6,8 @@ import argparse
 import os
 import imp
 import re
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 from mimic3models.in_hospital_mortality import utils
 from mimic3benchmark.readers import InHospitalMortalityReader
