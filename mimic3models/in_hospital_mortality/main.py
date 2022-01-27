@@ -7,6 +7,7 @@ import os
 import imp
 import re
 import warnings
+import tensorflow as tf
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 from mimic3models.in_hospital_mortality import utils
@@ -81,18 +82,20 @@ print("==> compiling the model")
 optimizer_config = {'class_name': args.optimizer,
                     'config': {'lr': args.lr,
                                'beta_1': args.beta_1}}
-
+optimizer=tf.keras.optimizers()
 # NOTE: one can use binary_crossentropy even for (B, T, C) shape.
 #       It will calculate binary_crossentropies for each class
 #       and then take the mean over axis=-1. Tre results is (B, T).
+
 if target_repl:
     loss = ['binary_crossentropy'] * 2
     loss_weights = [1 - args.target_repl_coef, args.target_repl_coef]
 else:
     loss = 'binary_crossentropy'
     loss_weights = None
+optimizer=tf.keras.optimizers.Adam(lr=args.lr, beta_1=args.beta_1)
 
-model.compile(optimizer=optimizer_config,
+model.compile(optimizer=optimizer,
               loss=loss,
               loss_weights=loss_weights)
 model.summary()
@@ -145,15 +148,15 @@ if args.mode == 'train':
                            append=True, separator=';')
 
     print("==> training")
-    model.fit(x=train_raw[0],
-              y=train_raw[1],
+    model.fit(x=np.array(train_raw[0]),
+              y=np.array(train_raw[1]),
               validation_data=val_raw,
               epochs=n_trained_chunks + args.epochs,
               initial_epoch=n_trained_chunks,
               callbacks=[metrics_callback, saver, csv_logger],
               shuffle=True,
-              verbose=args.verbose,
-              batch_size=args.batch_size)
+              verbose=np.array(args.verbose),
+              batch_size=np.array(args.batch_size))
 
 elif args.mode == 'test':
 
