@@ -147,6 +147,7 @@ if args.mode == 'train':
                            append=True, separator=';')
 
     print("==> training")
+    type(args.batch_size)
     model.fit(x=np.array(train_raw[0]),
               y=np.array(train_raw[1]),
               validation_data=val_raw,
