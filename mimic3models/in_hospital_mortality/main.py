@@ -82,7 +82,6 @@ print("==> compiling the model")
 optimizer_config = {'class_name': args.optimizer,
                     'config': {'lr': args.lr,
                                'beta_1': args.beta_1}}
-optimizer=tf.keras.optimizers()
 # NOTE: one can use binary_crossentropy even for (B, T, C) shape.
 #       It will calculate binary_crossentropies for each class
 #       and then take the mean over axis=-1. Tre results is (B, T).
