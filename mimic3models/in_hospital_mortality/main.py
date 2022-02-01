@@ -146,11 +146,12 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
-    print(train_raw[0])
-    print(train_raw[1])
-    print(np.array(train_raw[1]).T)
-    model.fit(x=train_raw[0],
-              y=np.array(train_raw[1]).T,
+    # print(train_raw[0])
+    # print(train_raw[1])
+    # print(np.array(train_raw[1]).T)
+    train_dataset = tf.data.Dataset.from_tensor_slices((train_raw[0], train_raw[1]))
+
+    model.fit(train_dataset,
               validation_data=val_raw,
               epochs=args.epochs,
               initial_epoch=n_trained_chunks,
