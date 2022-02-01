@@ -146,9 +146,11 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
-
+    print(train_raw[0])
+    print(train_raw[1])
+    print(np.array(train_raw[1]))
     model.fit(x=train_raw[0],
-              y=np.asarray(train_raw[1]),
+              y=np.array(train_raw[1]),
               validation_data=val_raw,
               epochs=args.epochs,
               initial_epoch=n_trained_chunks,
