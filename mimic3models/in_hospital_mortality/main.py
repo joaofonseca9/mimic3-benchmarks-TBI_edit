@@ -147,6 +147,9 @@ if args.mode == 'train':
                            append=True, separator=';')
 
     print("==> training")
+    print(type(train_raw[0]))
+    print(type(train_raw[1]))
+
     if isinstance(train_raw[0],np.ndarray):
         train_raw[0]=train_raw[0].tolist()
 
