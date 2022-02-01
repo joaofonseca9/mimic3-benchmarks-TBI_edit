@@ -150,13 +150,12 @@ if args.mode == 'train':
     print(type(train_raw[0]))
     print(type(train_raw[1]))
 
-    if isinstance(train_raw[0],np.ndarray):
-        a=train_raw[0].copy()
-        train_raw[0]=list(a)
+    if isinstance(train_raw[0],list):
+        train_raw[0]=np.array(train_raw[0])
 
-    if isinstance(train_raw[1],np.ndarray):
-        a=train_raw[1].copy()
-        train_raw[1]=list(a)
+    if isinstance(train_raw[1],lit):
+        train_raw[1]=np.array(train_raw[1])
+
 
     model.fit(x=train_raw[0].to_numpy(),
               y=np.array(train_raw[1]),
