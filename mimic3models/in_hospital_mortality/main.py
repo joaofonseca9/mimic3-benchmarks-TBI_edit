@@ -148,9 +148,9 @@ if args.mode == 'train':
 
     print(train_raw[0])
     print(train_raw[1])
-    print(np.array(train_raw[1]))
+    print(np.array(train_raw[1]).T)
     model.fit(x=train_raw[0],
-              y=np.array(train_raw[1]),
+              y=np.array(train_raw[1]).T,
               validation_data=val_raw,
               epochs=args.epochs,
               initial_epoch=n_trained_chunks,
