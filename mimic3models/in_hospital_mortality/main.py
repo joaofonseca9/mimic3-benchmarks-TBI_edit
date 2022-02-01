@@ -160,7 +160,7 @@ if args.mode == 'train':
     # else:
     #     yy=train_raw[1]
 
-
+    print(train_raw[1])
     model.fit(x=train_raw[0],
               y=np.array(train_raw[1]),
               validation_data=val_raw,
