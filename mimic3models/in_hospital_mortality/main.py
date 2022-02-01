@@ -160,9 +160,10 @@ if args.mode == 'train':
     # else:
     #     yy=train_raw[1]
 
-    print(train_raw[1])
+    yy=np.array(train_raw[1])
+    print(type(yy))
     model.fit(x=train_raw[0],
-              y=np.array(train_raw[1]),
+              y=yy,
               validation_data=val_raw,
               epochs=100,
               initial_epoch=n_trained_chunks,
