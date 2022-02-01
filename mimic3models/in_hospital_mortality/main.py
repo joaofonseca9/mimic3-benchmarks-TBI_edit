@@ -151,12 +151,12 @@ if args.mode == 'train':
     print(type(train_raw[1]))
 
     if isinstance(train_raw[0],np.ndarray):
-        xx=list(train_raw[0])
+        xx=train_raw[0].tolist()
     else:
         xx=train_raw[0]
 
     if isinstance(train_raw[1],np.ndarray):
-        yy=list(train_raw[1])
+        yy=train_raw[1].tolist()
     else:
         yy=train_raw[1]
 
