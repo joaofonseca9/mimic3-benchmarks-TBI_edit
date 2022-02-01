@@ -153,7 +153,7 @@ if args.mode == 'train':
     if isinstance(train_raw[0],list):
         train_raw[0]=np.array(train_raw[0])
 
-    if isinstance(train_raw[1],lit):
+    if isinstance(train_raw[1],list):
         train_raw[1]=np.array(train_raw[1])
 
 
