@@ -147,16 +147,16 @@ if args.mode == 'train':
                            append=True, separator=';')
 
     print("==> training")
-    type(args.batch_size)
-    model.fit(x=np.array(train_raw[0]),
+    print(type(args.train_raw[0])==type(args.train_raw[1]))
+    model.fit(x=train_raw[0],
               y=np.array(train_raw[1]),
               validation_data=val_raw,
-              epochs=n_trained_chunks + args.epochs,
+              epochs=100,
               initial_epoch=n_trained_chunks,
               callbacks=[metrics_callback, saver, csv_logger],
               shuffle=True,
-              verbose=np.array(args.verbose),
-              batch_size=np.array(args.batch_size))
+              verbose=1,
+              batch_size=8)
 
 elif args.mode == 'test':
 
