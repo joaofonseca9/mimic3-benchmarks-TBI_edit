@@ -147,7 +147,7 @@ if args.mode == 'train':
                            append=True, separator=';')
 
     print("==> training")
-    print(type(args.train_raw[0])==type(args.train_raw[1]))
+    print(type(train_raw[0])==type(train_raw[1]))
     model.fit(x=train_raw[0],
               y=np.array(train_raw[1]),
               validation_data=val_raw,
