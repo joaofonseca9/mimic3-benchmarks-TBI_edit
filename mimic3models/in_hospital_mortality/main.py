@@ -147,8 +147,13 @@ if args.mode == 'train':
                            append=True, separator=';')
 
     print("==> training")
-    print(type(train_raw[0])==type(train_raw[1]))
-    model.fit(x=train_raw[0],
+    if isinstance(train_raw[0],np.ndarray):
+        train_raw[0]=list(train_raw[0])
+
+    if isinstance(train_raw[1],np.ndarray):
+        train_raw[1]=list(train_raw[1])
+        
+    model.fit(x=train_raw[0].to_numpy(),
               y=np.array(train_raw[1]),
               validation_data=val_raw,
               epochs=100,
