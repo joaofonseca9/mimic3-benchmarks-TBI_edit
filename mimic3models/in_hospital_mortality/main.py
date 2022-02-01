@@ -150,15 +150,19 @@ if args.mode == 'train':
     print(type(train_raw[0]))
     print(type(train_raw[1]))
 
-    if isinstance(train_raw[0],list):
-        train_raw[0]=np.array(train_raw[0])
+    if isinstance(train_raw[0],np.ndarray):
+        xx=list(train_raw[0])
+    else:
+        xx=train_raw[0]
 
-    if isinstance(train_raw[1],list):
-        train_raw[1]=np.array(train_raw[1])
+    if isinstance(train_raw[1],np.ndarray):
+        yy=list(train_raw[1])
+    else:
+        yy=train_raw[1]
 
 
-    model.fit(x=train_raw[0].to_numpy(),
-              y=np.array(train_raw[1]),
+    model.fit(x=xx,
+              y=yy,
               validation_data=val_raw,
               epochs=100,
               initial_epoch=n_trained_chunks,
