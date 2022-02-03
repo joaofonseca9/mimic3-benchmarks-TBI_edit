@@ -150,8 +150,8 @@ if args.mode == 'train':
     y = train_raw[1]
     # print(np.array(train_raw[1]).T)
     # train_dataset = tf.data.Dataset.from_tensor_slices((train_raw[0], train_raw[1]))
-    print(x.shape, x.dtype)
-    print(np.shape(y)) 
+    print(x.shape, x.dtype) #14655, 48, 76
+    print(np.shape(y))  #14655
     y=np.array(y)
     model.fit(x=x,
               y=y,
