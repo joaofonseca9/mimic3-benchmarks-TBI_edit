@@ -12,6 +12,7 @@ def load_data(reader, discretizer, normalizer, small_part=False, return_names=Fa
     if small_part:
         N = 1000
     ret = common_utils.read_chunk(reader, N)
+    print('ret',np.shape(ret))
     data = ret["X"]
     ts = ret["t"]
     labels = ret["y"]
