@@ -12,9 +12,11 @@ def load_data(reader, discretizer, normalizer, small_part=False, return_names=Fa
     if small_part:
         N = 1000
     ret = common_utils.read_chunk(reader, N)
-    print('ret',np.shape(ret))
+    # print('ret',np.shape(ret))
     data = ret["X"]
+    print('data',np.shape(data))
     ts = ret["t"]
+    print('ts',np.shape(ts))
     labels = ret["y"]
     names = ret["name"]
     data = [discretizer.transform(X, end=t)[0] for (X, t) in zip(data, ts)]
