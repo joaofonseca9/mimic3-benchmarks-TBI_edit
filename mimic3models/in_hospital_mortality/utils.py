@@ -8,6 +8,7 @@ import os
 
 def load_data(reader, discretizer, normalizer, small_part=False, return_names=False):
     N = reader.get_number_of_examples()
+    print('Number of examples: ', N)
     if small_part:
         N = 1000
     ret = common_utils.read_chunk(reader, N)
