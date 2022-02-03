@@ -55,7 +55,8 @@ class Discretizer:
             max_hours = end - first_time
 
         N_bins = int(max_hours / self._timestep + 1.0 - eps)
-
+        print('N_bins:',N_bins)
+        print('N_channels:',N_channels)
         cur_len = 0
         begin_pos = [0 for i in range(N_channels)]
         end_pos = [0 for i in range(N_channels)]
