@@ -64,6 +64,20 @@ args_dict['header'] = discretizer_header
 args_dict['task'] = 'ihm'
 args_dict['target_repl'] = target_repl
 
+# Read data
+train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
+val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
+
+x = train_raw[0]
+y = train_raw[1]
+# print(np.array(train_raw[1]).T)
+# train_dataset = tf.data.Dataset.from_tensor_slices((train_raw[0], train_raw[1]))
+print(x.shape, x.dtype) #14655, 48, 76
+print(x)
+print(np.shape(y))  #14655
+y=np.array(y)
+print(y)
+
 # Build the model
 print("==> using model {}".format(args.network))
 model_module = imp.load_source(os.path.basename(args.network), args.network)
@@ -106,9 +120,7 @@ if args.load_state != "":
     n_trained_chunks = int(re.match(".*epoch([0-9]+).*", args.load_state).group(1))
 
 
-# Read data
-train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
-val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
+
 
 if target_repl:
     T = train_raw[0][0].shape[0]
@@ -146,13 +158,7 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
-    x = train_raw[0]
-    y = train_raw[1]
-    # print(np.array(train_raw[1]).T)
-    # train_dataset = tf.data.Dataset.from_tensor_slices((train_raw[0], train_raw[1]))
-    print(x.shape, x.dtype) #14655, 48, 76
-    print(np.shape(y))  #14655
-    y=np.array(y)
+
     model.fit(x=x,
               y=y,
               validation_data=val_raw,
