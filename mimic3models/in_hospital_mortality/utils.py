@@ -18,11 +18,11 @@ def load_data(reader, discretizer, normalizer, small_part=False, return_names=Fa
     labels = ret["y"]
     names = ret["name"]
     data = [discretizer.transform(X, end=t)[0] for (X, t) in zip(data, ts)]
-    print('discretized data', data,'\n','shape:',data.shape())
+    print('discretized data', data,'\nshape:',np.shape(data))
     if normalizer is not None:
         data = [normalizer.transform(X) for X in data]
     whole_data = (np.array(data), labels)
-    print('normalized data:', whole_data.head(),'\n','shape:',whole_data.shape())
+    print('normalized data:', whole_data.head(),'\nshape:',whole_data.shape())
     if not return_names:
         return whole_data
     return {"data": whole_data, "names": names}
