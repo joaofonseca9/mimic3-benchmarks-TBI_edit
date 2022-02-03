@@ -67,7 +67,7 @@ args_dict['target_repl'] = target_repl
 # Read data
 print('==> reading data')
 train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
-val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
+# val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
 
 x = train_raw[0]
 y = train_raw[1]
