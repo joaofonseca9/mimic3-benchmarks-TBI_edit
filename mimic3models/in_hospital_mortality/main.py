@@ -65,6 +65,7 @@ args_dict['task'] = 'ihm'
 args_dict['target_repl'] = target_repl
 
 # Read data
+print('==> reading data')
 train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
 val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
 
