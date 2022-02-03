@@ -80,7 +80,7 @@ print(x.shape, x.dtype) #14655, 48, 76
 print(x)
 print('y\n')
 print(np.shape(y))  #14655
-y=np.array(y)
+# y=np.array(y)
 print(y)
 
 # Build the model
