@@ -23,10 +23,10 @@ def process_partition(args, partition, eps=1e-6, n_hours=48):
         #Get Diagnoses
         diagnoses=read_diagnoses(patient_folder)
         TBI_ICD9=get_TBI_ICD9()
-
+        
+        #Remove non TBI patients
         for diag in diagnoses:
             if not diag in TBI_ICD9:
-                #It is not a TBI patient and we can skip it
                 break
         
 
@@ -59,6 +59,12 @@ def process_partition(args, partition, eps=1e-6, n_hours=48):
                 # no measurements in ICU
                 if len(ts_lines) == 0:
                     print("\n\t(no events in ICU) ", patient, ts_filename)
+                    continue
+                
+                time_series_df = pd.read_csv(os.path.join(patient_folder, ts_filename))
+                    
+                if all(time_series_df['Glascow coma scale motor response'].isnull()):
+                    print("\n\t(no Motor GCS) ", patient, ts_filename)
                     continue
 
                 output_ts_filename = patient + "_" + ts_filename
