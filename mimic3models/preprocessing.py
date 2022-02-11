@@ -70,7 +70,6 @@ class Discretizer:
             cur_len = end_pos[i]
 
         data = np.zeros(shape=(N_bins, cur_len), dtype=float)
-        print('data_shape_after_discretizer.transform:',np.shape(data))
         mask = np.zeros(shape=(N_bins, N_channels), dtype=int)
         original_value = [["" for j in range(N_channels)] for i in range(N_bins)]
         total_data = 0

@@ -71,17 +71,17 @@ val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
 
 x = train_raw[0]
 y = train_raw[1]
-print('trainraw\n')
-print(train_raw)
+# print('trainraw\n')
+# print(train_raw)
 # print(np.array(train_raw[1]).T)
 # train_dataset = tf.data.Dataset.from_tensor_slices((train_raw[0], train_raw[1]))
-print('x\n')
-print(x.shape, x.dtype) #14655, 48, 76
-print(x)
-print('y\n')
-print(np.shape(y))  #14655
-# y=np.array(y)
-print(y)
+# print('x\n')
+# print(x.shape, x.dtype) #14655, 48, 76
+# print(x)
+# print('y\n')
+# print(np.shape(y))  #14655
+# # y=np.array(y)
+# print(y)
 
 # Build the model
 print("==> using model {}".format(args.network))
