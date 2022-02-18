@@ -31,6 +31,13 @@ except:
 patients = read_patients_table(args.mimic3_path)
 admits = read_admissions_table(args.mimic3_path)
 stays = read_icustays_table(args.mimic3_path)
+diagnoses = read_icd_diagnoses_table(args.mimic3_path)
+
+stays = filter_TBI_subjects_on_diagnoses(diagnoses, stays)
+if args.verbose:
+    print('REMOVE NON-TBI PATIENTS:\n\tICUSTAY_IDs: {}\n\tHADM_IDs: {}\n\tSUBJECT_IDs: {}'.format(stays.ICUSTAY_ID.unique().shape[0],
+          stays.HADM_ID.unique().shape[0], stays.SUBJECT_ID.unique().shape[0]))
+
 if args.verbose:
     print('START:\n\tICUSTAY_IDs: {}\n\tHADM_IDs: {}\n\tSUBJECT_IDs: {}'.format(stays.ICUSTAY_ID.unique().shape[0],
           stays.HADM_ID.unique().shape[0], stays.SUBJECT_ID.unique().shape[0]))
@@ -56,7 +63,6 @@ if args.verbose:
           stays.HADM_ID.unique().shape[0], stays.SUBJECT_ID.unique().shape[0]))
 
 stays.to_csv(os.path.join(args.output_path, 'all_stays.csv'), index=False)
-diagnoses = read_icd_diagnoses_table(args.mimic3_path)
 diagnoses = filter_diagnoses_on_stays(diagnoses, stays)
 diagnoses.to_csv(os.path.join(args.output_path, 'all_diagnoses.csv'), index=False)
 count_icd_codes(diagnoses, output_path=os.path.join(args.output_path, 'diagnosis_counts.csv'))
@@ -65,10 +71,7 @@ phenotypes = add_hcup_ccs_2015_groups(diagnoses, yaml.load(open(args.phenotype_d
 make_phenotype_label_matrix(phenotypes, stays).to_csv(os.path.join(args.output_path, 'phenotype_labels.csv'),
                                                       index=False, quoting=csv.QUOTE_NONNUMERIC)
 
-stays = filter_TBI_subjects_on_diagnoses(diagnoses, stays)
-if args.verbose:
-    print('REMOVE NON-TBI PATIENTS:\n\tICUSTAY_IDs: {}\n\tHADM_IDs: {}\n\tSUBJECT_IDs: {}'.format(stays.ICUSTAY_ID.unique().shape[0],
-          stays.HADM_ID.unique().shape[0], stays.SUBJECT_ID.unique().shape[0]))
+
 
 if args.test:
     pat_idx = np.random.choice(patients.shape[0], size=1000)
