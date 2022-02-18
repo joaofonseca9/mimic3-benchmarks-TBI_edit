@@ -76,7 +76,8 @@ def merge_on_subject_admission(table1, table2):
 
 
 def add_age_to_icustays(stays):
-    stays['AGE'] = stays.INTIME.subtract(stays.DOB).apply(lambda s: s / np.timedelta64(1, 's')) / 60./60/24/365
+    # stays['AGE'] = stays.INTIME.subtract(stays.DOB).apply(lambda s: s / np.timedelta64(1, 's')) / 60./60/24/365
+    stays['age'] = stays.apply(lambda e: (e['INTIME'] - e['DOB']).days/365, axis=1)
     stays.ix[stays.AGE < 0, 'AGE'] = 90
     return stays
 
@@ -112,7 +113,7 @@ def filter_diagnoses_on_stays(diagnoses, stays):
     return diagnoses.merge(stays[['SUBJECT_ID', 'HADM_ID', 'ICUSTAY_ID']].drop_duplicates(), how='inner',
                            left_on=['SUBJECT_ID', 'HADM_ID'], right_on=['SUBJECT_ID', 'HADM_ID'])
 
-def filter_subjects_on_diagnoses(diagnoses, stays):
+def filter_TBI_subjects_on_diagnoses(diagnoses, stays):
     TBI_ICD9_cdc=get_TBI_ICD9()
     TBI_patients=pd.Series(data=None, name='HADM_ID')
     for index, row in diagnoses.iterrows():
