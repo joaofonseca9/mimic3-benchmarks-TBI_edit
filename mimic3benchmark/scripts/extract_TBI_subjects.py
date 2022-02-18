@@ -65,7 +65,7 @@ phenotypes = add_hcup_ccs_2015_groups(diagnoses, yaml.load(open(args.phenotype_d
 make_phenotype_label_matrix(phenotypes, stays).to_csv(os.path.join(args.output_path, 'phenotype_labels.csv'),
                                                       index=False, quoting=csv.QUOTE_NONNUMERIC)
 
-stays = filter_subjects_on_diagnoses(diagnoses, stays)
+stays = filter_TBI_subjects_on_diagnoses(diagnoses, stays)
 if args.verbose:
     print('REMOVE NON-TBI PATIENTS:\n\tICUSTAY_IDs: {}\n\tHADM_IDs: {}\n\tSUBJECT_IDs: {}'.format(stays.ICUSTAY_ID.unique().shape[0],
           stays.HADM_ID.unique().shape[0], stays.SUBJECT_ID.unique().shape[0]))
