@@ -77,8 +77,9 @@ def merge_on_subject_admission(table1, table2):
 
 def add_age_to_icustays(stays):
     # stays['AGE'] = stays.INTIME.subtract(stays.DOB).apply(lambda s: s / np.timedelta64(1, 's')) / 60./60/24/365
-    stays['age'] = stays.apply(lambda e: (e['INTIME'].to_pydatetime() - e['DOB'].to_pydatetime()).days/365, axis=1)
-    stays.ix[stays.AGE < 0, 'AGE'] = 90
+    stays['AGE'] = stays.apply(lambda e: (e['INTIME'].to_pydatetime() - e['DOB'].to_pydatetime()).days/365, axis=1)
+    # print(stays.head())
+    stays.loc[stays.AGE < 0, 'AGE'] = 90
     return stays
 
 
@@ -124,15 +125,14 @@ def filter_TBI_subjects_on_diagnoses(diagnoses, stays):
                     tbi=1
                 else:
                     for string in ['concussion','skull']:
-                        if string in row['LONG_TITLE']:
+                        if string in row['LONG_TITLE'] or string in row['SHORT_TITLE']:
                             tbi=1
-                        elif string in row['SHORT_TITLE']:
-                            tbi=0
         if tbi==1:
             TBI_patients=TBI_patients.append(pd.Series(row['HADM_ID']))     
 
     to_keep=pd.DataFrame(TBI_patients,columns=['HADM_ID'])
     tbi_stays = stays.merge(to_keep, how='inner', left_on='HADM_ID', right_on='HADM_ID')
+    print(tbi_stays)
     return tbi_stays
 
 
