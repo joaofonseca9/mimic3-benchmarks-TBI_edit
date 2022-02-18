@@ -116,10 +116,10 @@ def filter_diagnoses_on_stays(diagnoses, stays):
 
 def filter_TBI_subjects_on_diagnoses(diagnoses, stays):
     TBI_ICD9_cdc=get_TBI_ICD9()
-    TBI_patients=pd.Series(data=None, name='HADM_ID')
+    TBI_patients=pd.Series(data=None, name='SUBJECT_ID')
     for index, row in diagnoses.iterrows():
         tbi=0
-        if row['HADM_ID'] not in TBI_patients:
+        if row['SUBJECT_ID'] not in TBI_patients:
             for code in TBI_ICD9_cdc:
                 if str(code) in str(row['ICD9_CODE'])[0:len(str(code))]:
                     tbi=1
@@ -128,10 +128,10 @@ def filter_TBI_subjects_on_diagnoses(diagnoses, stays):
                         if string in row['LONG_TITLE'] or string in row['SHORT_TITLE']:
                             tbi=1
         if tbi==1:
-            TBI_patients=TBI_patients.append(pd.Series(row['HADM_ID']))     
+            TBI_patients=TBI_patients.append(pd.Series(row['SUBJECT_ID']))     
 
-    to_keep=pd.DataFrame(TBI_patients,columns=['HADM_ID'])
-    tbi_stays = stays.merge(to_keep, how='inner', left_on='HADM_ID', right_on='HADM_ID')
+    to_keep=pd.DataFrame(TBI_patients,columns=['SUBJECT_ID'])
+    tbi_stays = stays.merge(to_keep, how='inner', left_on='SUBJECT_ID', right_on='SUBJECT_ID')
     print(tbi_stays)
     return tbi_stays
 
