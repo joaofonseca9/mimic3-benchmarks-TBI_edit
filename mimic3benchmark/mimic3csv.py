@@ -8,7 +8,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from mimic3benchmark.util import dataframe_from_csv
-
+from mimic3benchmark.subject import get_TBI_ICD9
 
 def read_patients_table(mimic3_path):
     pats = dataframe_from_csv(os.path.join(mimic3_path, 'PATIENTS.csv'))
@@ -111,6 +111,28 @@ def filter_icustays_on_age(stays, min_age=18, max_age=np.inf):
 def filter_diagnoses_on_stays(diagnoses, stays):
     return diagnoses.merge(stays[['SUBJECT_ID', 'HADM_ID', 'ICUSTAY_ID']].drop_duplicates(), how='inner',
                            left_on=['SUBJECT_ID', 'HADM_ID'], right_on=['SUBJECT_ID', 'HADM_ID'])
+
+def filter_subjects_on_diagnoses(diagnoses, stays):
+    TBI_ICD9_cdc=get_TBI_ICD9()
+    TBI_patients=pd.Series(data=None, name='HADM_ID')
+    for index, row in diagnoses.iterrows():
+        tbi=0
+        if row['HADM_ID'] not in TBI_patients:
+            for code in TBI_ICD9_cdc:
+                if str(code) in str(row['ICD9_CODE'])[0:len(str(code))]:
+                    tbi=1
+                else:
+                    for string in ['concussion','skull']:
+                        if string in row['LONG_TITLE']:
+                            tbi=1
+                        elif string in row['SHORT_TITLE']:
+                            tbi=0
+        if tbi==1:
+            TBI_patients=TBI_patients.append(pd.Series(row['HADM_ID']))     
+
+    to_keep=pd.DataFrame(TBI_patients,columns=['HADM_ID'])
+    tbi_stays = stays.merge(to_keep, how='inner', left_on='HADM_ID', right_on='HADM_ID')
+    return tbi_stays
 
 
 def break_up_stays_by_subject(stays, output_path, subjects=None):
