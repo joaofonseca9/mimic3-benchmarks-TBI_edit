@@ -63,9 +63,9 @@ def process_partition(args, partition, eps=1e-6, n_hours=48):
                 
                 time_series_df = pd.read_csv(os.path.join(patient_folder, ts_filename))
                     
-                if all(time_series_df['Glascow coma scale motor response'].isnull()):
-                    print("\n\t(no Motor GCS) ", patient, ts_filename)
-                    continue
+                # if all(time_series_df['Glascow coma scale motor response'].isnull()):
+                #     print("\n\t(no Motor GCS) ", patient, ts_filename)
+                #     continue
 
                 output_ts_filename = patient + "_" + ts_filename
                 with open(os.path.join(output_dir, output_ts_filename), "w") as outfile:
