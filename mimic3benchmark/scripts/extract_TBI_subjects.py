@@ -32,7 +32,10 @@ patients = read_patients_table(args.mimic3_path)
 admits = read_admissions_table(args.mimic3_path)
 stays = read_icustays_table(args.mimic3_path)
 diagnoses = read_icd_diagnoses_table(args.mimic3_path)
-
+if args.verbose:
+    print('FULL DATA:\n\tICUSTAY_IDs: {}\n\tHADM_IDs: {}\n\tSUBJECT_IDs: {}'.format(stays.ICUSTAY_ID.unique().shape[0],
+          stays.HADM_ID.unique().shape[0], stays.SUBJECT_ID.unique().shape[0]))
+          
 stays = filter_TBI_subjects_on_diagnoses(diagnoses, stays)
 if args.verbose:
     print('REMOVE NON-TBI PATIENTS:\n\tICUSTAY_IDs: {}\n\tHADM_IDs: {}\n\tSUBJECT_IDs: {}'.format(stays.ICUSTAY_ID.unique().shape[0],
