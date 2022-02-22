@@ -20,14 +20,14 @@ def process_partition(args, partition, eps=1e-6, n_hours=48):
     for patient in tqdm(patients, desc='Iterating over patients in {}'.format(partition)):
         patient_folder = os.path.join(args.root_path, partition, patient)
         patient_ts_files = list(filter(lambda x: x.find("timeseries") != -1, os.listdir(patient_folder)))
-        #Get Diagnoses
-        diagnoses=read_diagnoses(patient_folder)
-        TBI_ICD9=get_TBI_ICD9()
+        # #Get Diagnoses
+        # diagnoses=read_diagnoses(patient_folder)
+        # TBI_ICD9=get_TBI_ICD9()
         
-        #Remove non TBI patients
-        for diag in diagnoses:
-            if not diag in TBI_ICD9:
-                break
+        # #Remove non TBI patients
+        # for diag in diagnoses:
+        #     if not diag in TBI_ICD9:
+        #         break
         
 
         for ts_filename in patient_ts_files:
