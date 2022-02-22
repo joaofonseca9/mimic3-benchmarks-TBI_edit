@@ -18,7 +18,7 @@ def load_data(reader, discretizer, normalizer, small_part=False, return_names=Fa
     labels = ret["y"]
     names = ret["name"]
     data = [discretizer.transform(X, end=t)[0] for (X, t) in zip(data, ts)]
-    print('discretized data', data,'\nshape:',np.shape(data))
+    # print('discretized data', data,'\nshape:',np.shape(data))
     if normalizer is not None:
         data = [normalizer.transform(X) for X in data]
     whole_data = (np.array(data), np.array(labels))
