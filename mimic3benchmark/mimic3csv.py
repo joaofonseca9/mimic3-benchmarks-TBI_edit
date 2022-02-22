@@ -119,7 +119,7 @@ def filter_TBI_subjects_on_diagnoses(diagnoses, stays):
     TBI_patients=pd.Series(data=None, name='SUBJECT_ID')
     for index, row in diagnoses.iterrows():
         tbi=0
-        if row['SUBJECT_ID'] not in TBI_patients:
+        if row['SUBJECT_ID'] not in TBI_patients.values:
             for code in TBI_ICD9_cdc:
                 if str(code) in str(row['ICD9_CODE'])[0:len(str(code))]:
                     tbi=1
