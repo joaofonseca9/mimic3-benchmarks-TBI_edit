@@ -48,7 +48,9 @@ for subject_dir in tqdm(os.listdir(args.subjects_root_path), desc='Iterating ove
 
     # cleaning and converting to time series
     events = map_itemids_to_variables(events, var_map)
+    print('\nevents:',events)
     events = clean_events(events)
+    print('\nclean events: ', events)
     if events.shape[0] == 0:
         # no valid events for this subject
         continue
