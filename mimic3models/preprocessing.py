@@ -114,7 +114,7 @@ class Discretizer:
 
         # impute missing values
 
-        if self._impute_strategy not in ['zero', 'normal_value', 'previous', 'next','mice']:
+        if self._impute_strategy not in ['zero', 'normal_value', 'previous', 'next', 'mice']:
             raise ValueError("impute strategy is invalid")
 
         if self._impute_strategy in ['normal_value', 'previous']:
