@@ -2,10 +2,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import numpy as np
+import pandas as pd
 import platform
 import pickle
 import json
 import os
+from sklearn.preprocessing import OneHotEncoder 
+from sklearn.compose import ColumnTransformer
 
 
 class Discretizer:
@@ -145,18 +148,16 @@ class Discretizer:
                     write(data, bin_id, channel, imputed_value, begin_pos)
         
         if self._impute_strategy == 'mice':
-            prev_values = [[] for i in range(len(self._id_to_channel))]
-            for bin_id in range(N_bins-1, -1, -1):
-                for channel in self._id_to_channel:
-                    channel_id = self._channel_to_id[channel]
-                    if mask[bin_id][channel_id] == 1:
-                        prev_values[channel_id].append(original_value[bin_id][channel_id])
-                        continue
-                    if len(prev_values[channel_id]) == 0:
-                        imputed_value = self._normal_values[channel]
-                    else:
-                        imputed_value = prev_values[channel_id][-1]
-                    write(data, bin_id, channel, imputed_value, begin_pos)
+            mice_imputer = IterativeImputer()
+            categorical=['Capillary refill rate','Glascow coma scale eye opening','Glascow coma scale motor response','Glascow coma scale total','Glascow coma scale verbal response']
+            cat_channels=list(config['possible_values'].values())
+            cat_channels = [x for x in cat_channels if x != []]
+            columnTransformer = ColumnTransformer([('encoder', OneHotEncoder(categories=cat_channels,handle_unknown='ignore',sparse=False),categorical)], remainder='passthrough')
+            mice_data=data.copy()
+            mice_data[mice_data==""]=np.nan
+            X_=pd.DataFrame(data,columns=list(self._possible_values))
+            X_ohe = np.array(columnTransformer.fit_transform(X_))
+            X_mice=mice_imputer.fit_transform(X_ohe)
 
 
 
