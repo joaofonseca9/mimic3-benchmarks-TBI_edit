@@ -9,6 +9,7 @@ import json
 import os
 from sklearn.preprocessing import OneHotEncoder 
 from sklearn.compose import ColumnTransformer
+from fancyimpute import IterativeImputer
 
 
 class Discretizer:
