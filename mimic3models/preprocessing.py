@@ -151,7 +151,7 @@ class Discretizer:
         if self._impute_strategy == 'mice':
             mice_imputer = IterativeImputer()
             categorical=['Capillary refill rate','Glascow coma scale eye opening','Glascow coma scale motor response','Glascow coma scale total','Glascow coma scale verbal response']
-            cat_channels=list(config['possible_values'].values())
+            cat_channels=list(self._possible_values.values())
             cat_channels = [x for x in cat_channels if x != []]
             columnTransformer = ColumnTransformer([('encoder', OneHotEncoder(categories=cat_channels,handle_unknown='ignore',sparse=False),categorical)], remainder='passthrough')
             mice_data=data.copy()
