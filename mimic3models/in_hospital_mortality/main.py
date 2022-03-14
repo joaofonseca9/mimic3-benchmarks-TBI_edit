@@ -46,12 +46,14 @@ val_reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, 'trai
 
 discretizer = Discretizer(timestep=float(args.timestep),
                           store_masks=True,
-                          impute_strategy='previous',
+                          impute_strategy='normal',
                           start_time='zero')
 
 discretizer_header = discretizer.transform(train_reader.read_example(0)["X"])[1].split(',')
 cont_channels = [i for (i, x) in enumerate(discretizer_header) if x.find("->") == -1]
 
+
+#Setup the normalization strat
 normalizer = Normalizer(fields=cont_channels)  # choose here which columns to standardize
 normalizer_state = args.normalizer_state
 if normalizer_state is None:
@@ -68,6 +70,7 @@ args_dict['target_repl'] = target_repl
 print('==> reading data')
 train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
 val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
+
 
 x = train_raw[0]
 y = train_raw[1]

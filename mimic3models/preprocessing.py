@@ -110,7 +110,7 @@ class Discretizer:
 
         # impute missing values
 
-        if self._impute_strategy not in ['zero', 'normal_value', 'previous', 'next']:
+        if self._impute_strategy not in ['zero', 'normal_value', 'previous', 'next','mice']:
             raise ValueError("impute strategy is invalid")
 
         if self._impute_strategy in ['normal_value', 'previous']:
@@ -143,6 +143,22 @@ class Discretizer:
                     else:
                         imputed_value = prev_values[channel_id][-1]
                     write(data, bin_id, channel, imputed_value, begin_pos)
+        
+        if self._impute_strategy == 'mice':
+            prev_values = [[] for i in range(len(self._id_to_channel))]
+            for bin_id in range(N_bins-1, -1, -1):
+                for channel in self._id_to_channel:
+                    channel_id = self._channel_to_id[channel]
+                    if mask[bin_id][channel_id] == 1:
+                        prev_values[channel_id].append(original_value[bin_id][channel_id])
+                        continue
+                    if len(prev_values[channel_id]) == 0:
+                        imputed_value = self._normal_values[channel]
+                    else:
+                        imputed_value = prev_values[channel_id][-1]
+                    write(data, bin_id, channel, imputed_value, begin_pos)
+
+
 
         empty_bins = np.sum([1 - min(1, np.sum(mask[i, :])) for i in range(N_bins)])
         self._done_count += 1

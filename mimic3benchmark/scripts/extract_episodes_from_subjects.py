@@ -6,8 +6,7 @@ import os
 import sys
 from tqdm import tqdm
 
-from mimic3benchmark.subject import read_stays, read_diagnoses, read_events, get_events_for_stay,\
-    add_hours_elpased_to_events
+from mimic3benchmark.subject import read_stays, read_diagnoses, read_events, get_events_for_stay,add_hours_elpased_to_events
 from mimic3benchmark.subject import convert_events_to_timeseries, get_first_valid_from_timeseries
 from mimic3benchmark.preprocessing import read_itemid_to_variable_map, map_itemids_to_variables, clean_events
 from mimic3benchmark.preprocessing import assemble_episodic_data
@@ -48,14 +47,14 @@ for subject_dir in tqdm(os.listdir(args.subjects_root_path), desc='Iterating ove
 
     # cleaning and converting to time series
     events = map_itemids_to_variables(events, var_map)
-    print('\nevents:',events)
+    # print('\nevents:',events)
     events = clean_events(events)
-    print('\nclean events: ', events)
+    # print('\nclean events: ', events)
     if events.shape[0] == 0:
         # no valid events for this subject
         continue
     timeseries = convert_events_to_timeseries(events, variables=variables)
-
+    # print('\converted events: ', timeseries)
     # extracting separate episodes
     for i in range(stays.shape[0]):
         stay_id = stays.ICUSTAY_ID.iloc[i]
