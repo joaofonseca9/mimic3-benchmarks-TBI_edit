@@ -156,7 +156,7 @@ class Discretizer:
             columnTransformer = ColumnTransformer([('encoder', OneHotEncoder(categories=cat_channels,handle_unknown='ignore',sparse=False),categorical)], remainder='passthrough')
             mice_data=data.copy()
             mice_data[mice_data==""]=np.nan
-            X_=pd.DataFrame(mice_data,columns=list(self._possible_values))
+            X_=pd.DataFrame(mice_data,columns=header)
             X_ohe = np.array(columnTransformer.fit_transform(X_))
             X_mice=mice_imputer.fit_transform(X_ohe)
 
