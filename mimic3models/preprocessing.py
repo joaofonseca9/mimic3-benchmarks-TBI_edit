@@ -153,11 +153,33 @@ class Discretizer:
             categorical=['Capillary refill rate','Glascow coma scale eye opening','Glascow coma scale motor response','Glascow coma scale total','Glascow coma scale verbal response']
             cat_channels=list(self._possible_values.values())
             cat_channels = [x for x in cat_channels if x != []]
-            columnTransformer = ColumnTransformer([('encoder', OneHotEncoder(categories=cat_channels,handle_unknown='ignore',sparse=False),categorical)], remainder='passthrough')
-            mice_data=pd.DataFrame(data,columns=header)
-            mice_data[mice_data==""]=np.nan
-            X_ohe = np.array(columnTransformer.fit_transform(mice_data))
-            data=mice_imputer.fit_transform(X_ohe)
+            columnTransformer = ColumnTransformer([('ohe', OneHotEncoder(categories=cat_channels,handle_unknown='ignore',sparse=False),categorical)], remainder='passthrough')
+
+            X_df=pd.DataFrame(X[:,1:],columns=header[1:])
+            X_df[X_df==""]=np.nan
+            X_ohe = columnTransformer.fit_transform(X_df)
+            X_ohe=pd.DataFrame(X_ohe,columns=columnTransformer.get_feature_names_out())
+            all_missing=[]
+            for col in X_ohe:
+                if X_ohe[col].isnull().all():
+                    all_missing.append(col)
+
+            for ft_name in self._normal_values:
+                for missing_ft in all_missing:
+                    if ft_name in missing_ft:
+                        X_ohe[missing_ft]=float(self._normal_values[ft_name])
+
+
+            X_mice=mice_imputer.fit_transform(X_ohe)
+            X_mice=np.concatenate((X[:,0].reshape(-1,1),X_mice),axis=1)
+            for row in X_mice:
+                    t = float(row[0]) - first_time
+                    if t > max_hours + eps:
+                        continue
+                    bin_id = int(t / self._timestep - eps)
+                    assert 0 <= bin_id < N_bins
+
+                    data[bin_id,:]=row[1:]
 
 
 
