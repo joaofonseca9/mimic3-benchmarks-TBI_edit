@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
+from imblearn.over_sampling import SMOTE
 
 import numpy as np
 import argparse
@@ -71,9 +72,32 @@ print('==> reading data')
 train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
 val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
 
+# Oversample
 
-x = train_raw[0]
-y = train_raw[1]
+sm = SMOTE(sampling_strategy='minority',random_state=42)
+
+#First, reshape our data with shape (samples, time, fts) to (samples, fts)
+X=train_raw[0]
+y=train_raw[1]
+n_fts=np.shape(X)[2]
+n_samples=np.shape(X)[0]
+# X_reshape=np.reshape(X,(X.shape[0],X.shape[1]))
+X_res=[]
+y_res=[]
+for t in range(0,X.shape[1]):
+  X_res_t, y_res_t = sm.fit_resample(X[:,t,:], y)
+  X_res.append(X_res_t)
+  y_res.append(y_res_t)
+
+#Reshape to (samples, time, fts)
+arr=np.vstack(X_res)
+X_res=np.reshape(arr,(np.shape(X_res)[1],np.shape(X_res)[0],np.shape(X_res)[2]))
+
+#Now we have labels in the shape of time, samples because we used SMOTE 
+#for each time step, but every timestep has the same label i.e. columns of 1 
+#and 0
+y_res=np.vstack(y_res)[1,:]
+
 # print('trainraw\n')
 # print(train_raw)
 # print(np.array(train_raw[1]).T)
@@ -107,10 +131,18 @@ optimizer_config = {'class_name': args.optimizer,
 # NOTE: one can use binary_crossentropy even for (B, T, C) shape.
 #       It will calculate binary_crossentropies for each class
 #       and then take the mean over axis=-1. Tre results is (B, T).
+samples_per_cls=len(y)-sum(y),[sum(y)]
 
 if target_repl:
     loss = ['binary_crossentropy'] * 2
     loss_weights = [1 - args.target_repl_coef, args.target_repl_coef]
+elif args.cbloss:
+    loss = ['binary_crossentropy'] * 2
+    if args.beta:
+            args.beta = 0.9
+    effective_num = 1.0 - np.power(args.beta, samples_per_cls)
+    loss_weights = (1.0-args.beta)/np.array(effective_num)
+    loss_weights = loss_weights / np.sum(loss_weights) * 2
 else:
     loss = 'binary_crossentropy'
     loss_weights = None
@@ -166,9 +198,8 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
-
-    model.fit(x=x,
-              y=y,
+    model.fit(x=X_res,
+              y=y_res,
               validation_data=val_raw,
               epochs=n_trained_chunks + args.epochs,
               initial_epoch=n_trained_chunks,
