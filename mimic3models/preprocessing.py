@@ -149,7 +149,7 @@ class Discretizer:
                     write(data, bin_id, channel, imputed_value, begin_pos)
         
         if self._impute_strategy == 'mice':
-            mice_imputer = IterativeImputer()
+            mice_imputer = IterativeImputer(max_iter=20)
             categorical=['Capillary refill rate','Glascow coma scale eye opening','Glascow coma scale motor response','Glascow coma scale total','Glascow coma scale verbal response']
             cat_channels=list(self._possible_values.values())
             cat_channels = [x for x in cat_channels if x != []]
