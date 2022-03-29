@@ -73,6 +73,7 @@ args_dict['header'] = discretizer_header
 args_dict['task'] = 'ihm'
 args_dict['target_repl'] = target_repl
 
+
 # Read data
 print('==> reading data')
 train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
@@ -137,21 +138,23 @@ optimizer_config = {'class_name': args.optimizer,
 # NOTE: one can use binary_crossentropy even for (B, T, C) shape.
 #       It will calculate binary_crossentropies for each class
 #       and then take the mean over axis=-1. Tre results is (B, T).
-samples_per_cls=len(y)-sum(y),[sum(y)]
+
 
 if target_repl:
     loss = ['binary_crossentropy'] * 2
     loss_weights = [1 - args.target_repl_coef, args.target_repl_coef]
 elif args.cbloss:
+    samples_per_cls=[len(y)-sum(y),sum(y)]
     loss = ['binary_crossentropy'] * 2
-    if args.beta:
-            args.beta = 0.9
-    effective_num = 1.0 - np.power(args.beta, samples_per_cls)
-    loss_weights = (1.0-args.beta)/np.array(effective_num)
+    beta=float(args.beta)
+    effective_num = 1.0 - np.power(beta, samples_per_cls)
+    loss_weights = (1.0-beta)/np.array(effective_num)
     loss_weights = loss_weights / np.sum(loss_weights) * 2
 else:
     loss = 'binary_crossentropy'
     loss_weights = None
+
+print('Loss:',loss,'\n')
 
 optimizer=tf.keras.optimizers.Adam(lr=args.lr, beta_1=args.beta_1)
 
