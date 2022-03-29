@@ -47,7 +47,7 @@ val_reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, 'trai
 
 discretizer = Discretizer(timestep=float(args.timestep),
                           store_masks=True,
-                          impute_strategy='mice',
+                          impute_strategy='normal',
                           start_time='zero')
 
 discretizer_header = discretizer.transform(train_reader.read_example(0)["X"])[1].split(',')
