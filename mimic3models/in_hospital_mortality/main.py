@@ -28,6 +28,12 @@ parser.add_argument('--data', type=str, help='Path to the data of in-hospital mo
                     default=os.path.join(os.path.dirname(__file__), '../../data/in-hospital-mortality/'))
 parser.add_argument('--output_dir', type=str, help='Directory relative which all output files are stored',
                     default='.')
+parser.add_argument('--cbloss', type=str, help='Use Class-Balanced Loss',
+                    default=False)
+parser.add_argument('--beta', type=str, help='beta for CBL',
+                    default=0.9)
+parser.add_argument('--smote', type=str, help='oversample data',
+                    default=False)
 args = parser.parse_args()
 print(args)
 
@@ -71,32 +77,32 @@ args_dict['target_repl'] = target_repl
 print('==> reading data')
 train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_part)
 val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
-
-# Oversample
-
-sm = SMOTE(sampling_strategy='minority',random_state=42)
-
-#First, reshape our data with shape (samples, time, fts) to (samples, fts)
 X=train_raw[0]
 y=train_raw[1]
-n_fts=np.shape(X)[2]
-n_samples=np.shape(X)[0]
-# X_reshape=np.reshape(X,(X.shape[0],X.shape[1]))
-X_res=[]
-y_res=[]
-for t in range(0,X.shape[1]):
-  X_res_t, y_res_t = sm.fit_resample(X[:,t,:], y)
-  X_res.append(X_res_t)
-  y_res.append(y_res_t)
 
-#Reshape to (samples, time, fts)
-arr=np.vstack(X_res)
-X_res=np.reshape(arr,(np.shape(X_res)[1],np.shape(X_res)[0],np.shape(X_res)[2]))
+# Oversample
+if args.smote:
+  sm = SMOTE(sampling_strategy='minority',random_state=42)
 
-#Now we have labels in the shape of time, samples because we used SMOTE 
-#for each time step, but every timestep has the same label i.e. columns of 1 
-#and 0
-y_res=np.vstack(y_res)[1,:]
+  #First, reshape our data with shape (samples, time, fts) to (samples, fts)
+  n_fts=np.shape(X)[2]
+  n_samples=np.shape(X)[0]
+  # X_reshape=np.reshape(X,(X.shape[0],X.shape[1]))
+  X_res=[]
+  y_res=[]
+  for t in range(0,X.shape[1]):
+    X_res_t, y_res_t = sm.fit_resample(X[:,t,:], y)
+    X_res.append(X_res_t)
+    y_res.append(y_res_t)
+
+  #Reshape to (samples, time, fts)
+  arr=np.vstack(X_res)
+  X=np.reshape(arr,(np.shape(X_res)[1],np.shape(X_res)[0],np.shape(X_res)[2]))
+
+  #Now we have labels in the shape of time, samples because we used SMOTE 
+  #for each time step, but every timestep has the same label i.e. columns of 1 
+  #and 0
+  y=np.vstack(y_res)[1,:]
 
 # print('trainraw\n')
 # print(train_raw)
@@ -146,6 +152,7 @@ elif args.cbloss:
 else:
     loss = 'binary_crossentropy'
     loss_weights = None
+
 optimizer=tf.keras.optimizers.Adam(lr=args.lr, beta_1=args.beta_1)
 
 model.compile(optimizer=optimizer,
@@ -198,8 +205,8 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
-    model.fit(x=X_res,
-              y=y_res,
+    model.fit(x=X,
+              y=y,
               validation_data=val_raw,
               epochs=n_trained_chunks + args.epochs,
               initial_epoch=n_trained_chunks,
