@@ -21,6 +21,8 @@ from mimic3models import common_utils
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
 
+import tsaug
+
 parser = argparse.ArgumentParser()
 common_utils.add_common_arguments(parser)
 parser.add_argument('--target_repl_coef', type=float, default=0.0)
@@ -33,6 +35,10 @@ parser.add_argument('--cbloss', type=str, help='Use Class-Balanced Loss',
 parser.add_argument('--beta', type=str, help='beta for CBL',
                     default=0.9)
 parser.add_argument('--smote', type=str, help='oversample data',
+                    default=False)
+parser.add_argument('--timewarp', type=str, help='oversample data',
+                    default=False)
+parser.add_argument('--addnoise', type=str, help='oversample data',
                     default=False)
 args = parser.parse_args()
 print(args)
@@ -104,6 +110,42 @@ if args.smote:
   #for each time step, but every timestep has the same label i.e. columns of 1 
   #and 0
   y=np.vstack(y_res)[1,:]
+
+if args.timewarp:
+    #Determine number of samples to add so we get a 50/50´balanced set
+    no_min=sum(y)
+    no_maj=len(y)-sum(y)
+    no_oversamples=no_maj-no_min
+    X_transf=np.zeros(shape=(no_oversamples,X.shape[1],X.shape[2])) #shape: samples, time, features
+    X_min=X[y==1]
+    counter=0
+    for sample in range(0,no_oversamples):
+        for col in range(0,X_transf[sample,:,:].shape[1]):
+            if counter==X_min.shape[0]:
+                counter=0
+                X_transf[sample,:,col]=np.round(tsaug.TimeWarp().augment(X_min[counter,:,col]))
+                counter+=1
+
+    X=np.concatenate((X,X_transf))
+    y=np.concatenate((y,np.ones(no_oversamples)))
+
+if args.addnoise:
+    #Determine number of samples to add so we get a 50/50´balanced set
+    no_min=sum(y)
+    no_maj=len(y)-sum(y)
+    no_oversamples=no_maj-no_min
+    X_transf=np.zeros(shape=(no_oversamples,X.shape[1],X.shape[2])) #shape: samples, time, features
+    X_min=X[y==1]
+    counter=0
+    for sample in range(0,no_oversamples):
+        for col in range(0,X_transf[sample,:,:].shape[1]):
+            if counter==X_min.shape[0]:
+                counter=0
+                X_transf[sample,:,col]=np.round(tsaug.AddNoise(normalize=True, kind='multiplicative').augment(X_min[counter,:,col]))
+                counter+=1
+
+    X=np.concatenate((X,X_transf))
+    y=np.concatenate((y,np.ones(no_oversamples)))
 
 # print('trainraw\n')
 # print(train_raw)
