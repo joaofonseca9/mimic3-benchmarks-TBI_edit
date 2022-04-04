@@ -44,7 +44,7 @@ parser.add_argument('--addnoise', type=str, help='oversample data',
 parser.add_argument('--focal_loss', type=str, help='Use Class-Balanced Focal Loss',
                     default=False)
 parser.add_argument('--gamma', type=str, help='Gamma value for Class-Balanced Focal Loss',
-                    default=False)                        
+                    default=2)                        
 args = parser.parse_args()
 print(args)
 
