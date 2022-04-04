@@ -18,14 +18,17 @@ def print_metrics_binary(y_true, predictions, verbose=1):
         print(cf)
     cf = cf.astype(np.float32)
 
-    acc = (cf[0][0] + cf[1][1]) / np.sum(cf)
+    # acc = (cf[0][0] + cf[1][1]) / np.sum(cf)
     prec0 = cf[0][0] / (cf[0][0] + cf[1][0])
     prec1 = cf[1][1] / (cf[1][1] + cf[0][1])
     rec0 = cf[0][0] / (cf[0][0] + cf[0][1])
     rec1 = cf[1][1] / (cf[1][1] + cf[1][0])
     auroc = metrics.roc_auc_score(y_true, predictions[:, 1])
-    acc=metrics.balanced_accuracy_score(y_true,predictions[:, 1])
-    
+
+    sensitivity=cf[1][1]/(cf[1][1]+cf[1][0])
+    specificity=cf[0][0]/(cf[0][0]+cf[0][1])
+    acc=(sensitivity+specificity)/2
+
     (precisions, recalls, thresholds) = metrics.precision_recall_curve(y_true, predictions[:, 1])
     auprc = metrics.auc(recalls, precisions)
     minpse = np.max([min(x, y) for (x, y) in zip(precisions, recalls)])
