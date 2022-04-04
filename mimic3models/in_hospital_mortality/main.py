@@ -20,6 +20,7 @@ from mimic3models import keras_utils
 from mimic3models import common_utils
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
+from focal_loss import BinaryFocalLoss
 
 import tsaug
 
@@ -40,6 +41,10 @@ parser.add_argument('--timewarp', type=str, help='oversample data',
                     default=False)
 parser.add_argument('--addnoise', type=str, help='oversample data',
                     default=False)
+parser.add_argument('--focal_loss', type=str, help='Use Class-Balanced Focal Loss',
+                    default=False)
+parser.add_argument('--gamma', type=str, help='Gamma value for Class-Balanced Focal Loss',
+                    default=False)                        
 args = parser.parse_args()
 print(args)
 
@@ -89,30 +94,32 @@ y=train_raw[1]
 
 # Oversample
 if args.smote:
-  sm = SMOTE(sampling_strategy='minority',random_state=42)
+    print("Oversampling with SMOTE\n")
+    sm = SMOTE(sampling_strategy='minority',random_state=42)
 
-  #First, reshape our data with shape (samples, time, fts) to (samples, fts)
-  n_fts=np.shape(X)[2]
-  n_samples=np.shape(X)[0]
-  # X_reshape=np.reshape(X,(X.shape[0],X.shape[1]))
-  X_res=[]
-  y_res=[]
-  for t in range(0,X.shape[1]):
-    X_res_t, y_res_t = sm.fit_resample(X[:,t,:], y)
-    X_res.append(X_res_t)
-    y_res.append(y_res_t)
+    #First, reshape our data with shape (samples, time, fts) to (samples, fts)
+    n_fts=np.shape(X)[2]
+    n_samples=np.shape(X)[0]
+    # X_reshape=np.reshape(X,(X.shape[0],X.shape[1]))
+    X_res=[]
+    y_res=[]
+    for t in range(0,X.shape[1]):
+        X_res_t, y_res_t = sm.fit_resample(X[:,t,:], y)
+        X_res.append(X_res_t)
+        y_res.append(y_res_t)
 
-  #Reshape to (samples, time, fts)
-  arr=np.vstack(X_res)
-  X=np.reshape(arr,(np.shape(X_res)[1],np.shape(X_res)[0],np.shape(X_res)[2]))
+    #Reshape to (samples, time, fts)
+    arr=np.vstack(X_res)
+    X=np.reshape(arr,(np.shape(X_res)[1],np.shape(X_res)[0],np.shape(X_res)[2]))
 
-  #Now we have labels in the shape of time, samples because we used SMOTE 
-  #for each time step, but every timestep has the same label i.e. columns of 1 
-  #and 0
-  y=np.vstack(y_res)[1,:]
+    #Now we have labels in the shape of time, samples because we used SMOTE 
+    #for each time step, but every timestep has the same label i.e. columns of 1 
+    #and 0
+    y=np.vstack(y_res)[1,:]
 
 if args.timewarp:
     #Determine number of samples to add so we get a 50/50´balanced set
+    print("Oversampling with TimeWarp\n")
     no_min=sum(y)
     no_maj=len(y)-sum(y)
     no_oversamples=no_maj-no_min
@@ -131,6 +138,7 @@ if args.timewarp:
 
 if args.addnoise:
     #Determine number of samples to add so we get a 50/50´balanced set
+    print("Oversampling with AddNoise\n")
     no_min=sum(y)
     no_maj=len(y)-sum(y)
     no_oversamples=no_maj-no_min
@@ -186,13 +194,27 @@ if target_repl:
     loss = ['binary_crossentropy'] * 2
     loss_weights = [1 - args.target_repl_coef, args.target_repl_coef]
 elif args.cbloss:
+    print('=> using Class Balanced Binary Cross Entropy Loss')
     samples_per_cls=[len(y)-sum(y),sum(y)]
     loss = ['binary_crossentropy'] * 2
     beta=float(args.beta)
     effective_num = 1.0 - np.power(beta, samples_per_cls)
     loss_weights = (1.0-beta)/np.array(effective_num)
     loss_weights = loss_weights / np.sum(loss_weights) * 2
+elif args.focal_loss:
+    print('=> using Class Balanced Binart Focal Loss')
+    samples_per_cls=[len(y)-sum(y),sum(y)]
+    if args.gamma:
+        gamma=args.gamma
+    else:
+        gamma=2
+    loss = BinaryFocalLoss(gamma=gamma)
+    beta=float(args.beta)
+    effective_num = 1.0 - np.power(beta, samples_per_cls)
+    loss_weights = (1.0-beta)/np.array(effective_num)
+    loss_weights = loss_weights / np.sum(loss_weights) * 2
 else:
+    print('=> using Binary Cross Entropy Loss')
     loss = 'binary_crossentropy'
     loss_weights = None
 
@@ -249,6 +271,8 @@ if args.mode == 'train':
         os.makedirs(keras_logs)
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
+    
+    class_weights={0:1, 1:2}
 
     model.fit(x=X,
               y=y,

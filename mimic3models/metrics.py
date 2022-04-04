@@ -24,7 +24,8 @@ def print_metrics_binary(y_true, predictions, verbose=1):
     rec0 = cf[0][0] / (cf[0][0] + cf[0][1])
     rec1 = cf[1][1] / (cf[1][1] + cf[1][0])
     auroc = metrics.roc_auc_score(y_true, predictions[:, 1])
-
+    acc=metrics.balanced_accuracy_score(y_true,predictions[:, 1])
+    
     (precisions, recalls, thresholds) = metrics.precision_recall_curve(y_true, predictions[:, 1])
     auprc = metrics.auc(recalls, precisions)
     minpse = np.max([min(x, y) for (x, y) in zip(precisions, recalls)])
