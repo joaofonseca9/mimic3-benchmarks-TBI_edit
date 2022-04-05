@@ -45,7 +45,7 @@ parser.add_argument('--focal_loss', type=str, help='Use Class-Balanced Focal Los
                     default=False)
 parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced Focal Loss',
                     default=2.0)
-parser.add_argument('--class_weight', type=dict, help='Class weights for model fit', default=None)                        
+parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default='proportion')                        
 args = parser.parse_args()
 print(args)
 
@@ -272,6 +272,12 @@ if args.mode == 'train':
 
     if args.class_weight:
         print("=> using class weights\n")
+        if args.class_weight=='proportion':
+            class_weights={0: 0.816, 1: 0.184}
+        elif args.class_weight=='double':
+            class_weights={0: 1, 1: 2}
+        else:
+            class_weights={0: 0.816, 1: 0.184}
 
     model.fit(x=X,
               y=y,
@@ -282,7 +288,7 @@ if args.mode == 'train':
               shuffle=True,
               verbose=args.verbose,
               batch_size=args.batch_size,
-              class_weight=args.class_weight)
+              class_weight=class_weights)
 
 elif args.mode == 'test':
 
