@@ -270,7 +270,7 @@ if args.mode == 'train':
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
 
-    if args.class_weights:
+    if args.class_weight:
         print("=> using class weights\n")
 
     model.fit(x=X,
@@ -282,7 +282,7 @@ if args.mode == 'train':
               shuffle=True,
               verbose=args.verbose,
               batch_size=args.batch_size,
-              class_weights=args.class_weights)
+              class_weight=args.class_weight)
 
 elif args.mode == 'test':
 
