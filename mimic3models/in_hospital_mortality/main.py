@@ -33,7 +33,7 @@ parser.add_argument('--output_dir', type=str, help='Directory relative which all
                     default='.')
 parser.add_argument('--cbloss', type=str, help='Use Class-Balanced Loss',
                     default=False)
-parser.add_argument('--beta', type=str, help='beta for CBL',
+parser.add_argument('--beta', type=float, help='beta for CBL',
                     default=0.9)
 parser.add_argument('--smote', type=str, help='oversample data',
                     default=False)
@@ -43,8 +43,9 @@ parser.add_argument('--addnoise', type=str, help='oversample data',
                     default=False)
 parser.add_argument('--focal_loss', type=str, help='Use Class-Balanced Focal Loss',
                     default=False)
-parser.add_argument('--gamma', type=str, help='Gamma value for Class-Balanced Focal Loss',
-                    default=2)                        
+parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced Focal Loss',
+                    default=2.0)
+parser.add_argument('--class_weight', type=dict, help='Class weights for model fit', default=None)                        
 args = parser.parse_args()
 print(args)
 
@@ -94,7 +95,7 @@ y=train_raw[1]
 
 # Oversample
 if args.smote:
-    print("Oversampling with SMOTE\n")
+    print("=> Oversampling with SMOTE\n")
     sm = SMOTE(sampling_strategy='minority',random_state=42)
 
     #First, reshape our data with shape (samples, time, fts) to (samples, fts)
@@ -116,10 +117,9 @@ if args.smote:
     #for each time step, but every timestep has the same label i.e. columns of 1 
     #and 0
     y=np.vstack(y_res)[1,:]
-
-if args.timewarp:
+elif args.timewarp:
     #Determine number of samples to add so we get a 50/50´balanced set
-    print("Oversampling with TimeWarp\n")
+    print("=> Oversampling with TimeWarp\n")
     no_min=sum(y)
     no_maj=len(y)-sum(y)
     no_oversamples=no_maj-no_min
@@ -135,10 +135,9 @@ if args.timewarp:
 
     X=np.concatenate((X,X_transf))
     y=np.concatenate((y,np.ones(no_oversamples)))
-
-if args.addnoise:
+elif args.addnoise:
     #Determine number of samples to add so we get a 50/50´balanced set
-    print("Oversampling with AddNoise\n")
+    print("=> Oversampling with AddNoise\n")
     no_min=sum(y)
     no_maj=len(y)-sum(y)
     no_oversamples=no_maj-no_min
@@ -154,6 +153,8 @@ if args.addnoise:
 
     X=np.concatenate((X,X_transf))
     y=np.concatenate((y,np.ones(no_oversamples)))
+else:
+    print("=> No oversampling")
 
 # print('trainraw\n')
 # print(train_raw)
@@ -194,7 +195,7 @@ if target_repl:
     loss = ['binary_crossentropy'] * 2
     loss_weights = [1 - args.target_repl_coef, args.target_repl_coef]
 elif args.cbloss:
-    print('=> using Class Balanced Binary Cross Entropy Loss')
+    print('=> using Class Balanced Binary Cross Entropy Loss \n')
     samples_per_cls=[len(y)-sum(y),sum(y)]
     loss = ['binary_crossentropy'] * 2
     beta=float(args.beta)
@@ -202,19 +203,16 @@ elif args.cbloss:
     loss_weights = (1.0-beta)/np.array(effective_num)
     loss_weights = loss_weights / np.sum(loss_weights) * 2
 elif args.focal_loss:
-    print('=> using Class Balanced Binart Focal Loss')
+    print('=> using Class Balanced Binart Focal Loss \n')
     samples_per_cls=[len(y)-sum(y),sum(y)]
-    if args.gamma:
-        gamma=args.gamma
-    else:
-        gamma=2
+    gamma=args.gamma
     loss = BinaryFocalLoss(gamma=gamma)
     beta=float(args.beta)
     effective_num = 1.0 - np.power(beta, samples_per_cls)
     loss_weights = (1.0-beta)/np.array(effective_num)
     loss_weights = loss_weights / np.sum(loss_weights) * 2
 else:
-    print('=> using Binary Cross Entropy Loss')
+    print('=> using Binary Cross Entropy Loss \n')
     loss = 'binary_crossentropy'
     loss_weights = None
 
@@ -271,8 +269,9 @@ if args.mode == 'train':
         os.makedirs(keras_logs)
     csv_logger = CSVLogger(os.path.join(keras_logs, model.final_name + '.csv'),
                            append=True, separator=';')
-    
-    class_weights={0:1, 1:2}
+
+    if args.class_weights:
+        print("=> using class weights\n")
 
     model.fit(x=X,
               y=y,
@@ -282,7 +281,8 @@ if args.mode == 'train':
               callbacks=[metrics_callback, saver, csv_logger],
               shuffle=True,
               verbose=args.verbose,
-              batch_size=args.batch_size)
+              batch_size=args.batch_size,
+              class_weights=args.class_weights)
 
 elif args.mode == 'test':
 
