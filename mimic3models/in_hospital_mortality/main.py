@@ -47,7 +47,7 @@ parser.add_argument('--focal_loss', type=str, help='Use Class-Balanced Focal Los
                     default=False)
 parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced Focal Loss',
                     default=2.0)
-parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default='proportion')
+parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default=False)
 parser.add_argument('--gridsearch', type=str, help='use Grid Search CV', default=False)                        
 
 args = parser.parse_args()
@@ -169,7 +169,9 @@ suffix = ".bs{}{}{}.ts{}{}".format(args.batch_size,
                                    ".L1{}".format(args.l1) if args.l1 > 0 else "",
                                    ".L2{}".format(args.l2) if args.l2 > 0 else "",
                                    args.timestep,
-                                   ".trc{}".format(args.target_repl_coef) if args.target_repl_coef > 0 else "")
+                                   ".trc{}".format(args.target_repl_coef) if args.target_repl_coef > 0 else "",
+                                   ".trc{}".format(args.beta) if args.beta > 0 else "",
+                                   ".trc{}".format(args.gamma) if args.gamma > 0 else "")
 model.final_name = args.prefix + model.say_name() + suffix
 print("==> model.final_name:", model.final_name)
 
@@ -271,6 +273,8 @@ if args.mode == 'train':
             class_weights={0: 1, 1: 2}
         else:
             class_weights={0: 0.816, 1: 0.184}
+    else:
+        class_weights=None
 
     #GridSearch setup
 
