@@ -19,6 +19,8 @@ from mimic3models import metrics
 from mimic3models import keras_utils
 from mimic3models import common_utils
 
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
+
 from keras.callbacks import ModelCheckpoint, CSVLogger
 from focal_loss import BinaryFocalLoss
 
@@ -45,7 +47,9 @@ parser.add_argument('--focal_loss', type=str, help='Use Class-Balanced Focal Los
                     default=False)
 parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced Focal Loss',
                     default=2.0)
-parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default='proportion')                        
+parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default='proportion')
+parser.add_argument('--gridsearch', type=str, help='use Grid Search CV', default=False)                        
+
 args = parser.parse_args()
 print(args)
 
@@ -156,17 +160,6 @@ elif args.addnoise:
 else:
     print("=> No oversampling")
 
-# print('trainraw\n')
-# print(train_raw)
-# print(np.array(train_raw[1]).T)
-# train_dataset = tf.data.Dataset.from_tensor_slices((train_raw[0], train_raw[1]))
-# print('x\n')
-# print(x.shape, x.dtype) #14655, 48, 76
-# print(x)
-# print('y\n')
-# print(np.shape(y))  #14655
-# # y=np.array(y)
-# print(y)
 
 # Build the model
 print("==> using model {}".format(args.network))
@@ -279,16 +272,36 @@ if args.mode == 'train':
         else:
             class_weights={0: 0.816, 1: 0.184}
 
-    model.fit(x=X,
-              y=y,
-              validation_data=val_raw,
-              epochs=n_trained_chunks + args.epochs,
-              initial_epoch=n_trained_chunks,
-              callbacks=[metrics_callback, saver, csv_logger],
-              shuffle=True,
-              verbose=args.verbose,
-              batch_size=args.batch_size,
-              class_weight=class_weights)
+    #GridSearch setup
+
+    if args.gridsearch:
+        params = {"l1": [0,0.0001,0.01],
+        "l2": [0,0.0001,0.01],
+        "batch_size": [8, 16, 32],
+        "epochs":[50,100],
+        "lr":[0.3,0.5],
+        "dropout":[0.1,0.3,0.6],
+        "depth":[2,4]}
+
+        gs = GridSearchCV(model, params, scoring='roc_auc', 
+                        refit='roc_auc', n_jobs=1, 
+                        cv=3, return_train_score=True )
+        
+        gs.fit(X, y)
+        print("Best Scores: ", gs.best_score_,'\n')
+        print("Best Params: ", gs.best_params_,'\n')
+
+    else:
+        model.fit(x=X,
+                y=y,
+                validation_data=val_raw,
+                epochs=n_trained_chunks + args.epochs,
+                initial_epoch=n_trained_chunks,
+                callbacks=[metrics_callback, saver, csv_logger],
+                shuffle=True,
+                verbose=args.verbose,
+                batch_size=args.batch_size,
+                class_weight=class_weights)
 
 elif args.mode == 'test':
 
