@@ -10,6 +10,7 @@ from mimic3models.keras_utils import ExtendMask
 
 class Network(Model):
 
+
     def __init__(self, dim, batch_norm, dropout, rec_dropout, task,
                  target_repl=False, deep_supervision=False, num_classes=1,
                  depth=1, input_dim=76, **kwargs):
@@ -96,3 +97,14 @@ class Network(Model):
                                            ".d{}".format(self.dropout) if self.dropout > 0 else "",
                                            ".rd{}".format(self.rec_dropout) if self.rec_dropout > 0 else "",
                                            self.depth)
+
+    def get_params(self):
+        return {"dim" : self.dim,"batch_norm" : self.batch_norm,
+                "dropout" : self.dropout,"rec_dropout" : self.rec_dropout,
+                "depth" : self.depth}
+    
+    def set_params(self, **parameters):
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+
+        return self

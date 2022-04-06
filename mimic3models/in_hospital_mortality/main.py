@@ -19,6 +19,8 @@ from mimic3models import metrics
 from mimic3models import keras_utils
 from mimic3models import common_utils
 
+from keras.wrappers.scikit_learn import KerasClassifier
+
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
@@ -158,7 +160,7 @@ elif args.addnoise:
     X=np.concatenate((X,X_transf))
     y=np.concatenate((y,np.ones(no_oversamples)))
 else:
-    print("=> No oversampling")
+    print("=> No oversampling\n")
 
 
 # Build the model
@@ -278,15 +280,15 @@ if args.mode == 'train':
     #GridSearch setup
 
     if args.gridsearch:
-        params = {"l1": [0,0.0001,0.01],
-        "l2": [0,0.0001,0.01],
-        "batch_size": [8, 16, 32],
+        params = {"batch_size": [8, 16, 32],
         "epochs":[50,100],
         "lr":[0.3,0.5],
         "dropout":[0.1,0.3,0.6],
         "depth":[2,4]}
+        
+        model_ = KerasClassifier(build_fn = lambda: model, epochs = args.epochs, batch_size = args.batch_size, verbose = args.verbose)
 
-        gs = GridSearchCV(model, params, scoring='roc_auc', 
+        gs = GridSearchCV(model_, params, scoring='roc_auc', 
                         refit='roc_auc', n_jobs=1, 
                         cv=3, return_train_score=True )
         
