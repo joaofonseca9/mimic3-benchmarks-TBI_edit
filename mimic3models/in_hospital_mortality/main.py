@@ -200,8 +200,7 @@ elif args.cbloss:
 elif args.focal_loss:
     print('=> using Class Balanced Binart Focal Loss \n')
     samples_per_cls=[len(y)-sum(y),sum(y)]
-    gamma=args.gamma
-    loss = BinaryFocalLoss(gamma=gamma)
+    loss = BinaryFocalLoss(gamma=args.gamma)
     beta=float(args.beta)
     effective_num = 1.0 - np.power(beta, samples_per_cls)
     loss_weights = (1.0-beta)/np.array(effective_num)
