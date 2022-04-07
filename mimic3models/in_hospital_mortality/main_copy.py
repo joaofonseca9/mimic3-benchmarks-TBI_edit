@@ -162,7 +162,7 @@ else:
 
 
 # Build the model
-def create_model(batch_size=args.batch_size, learning_rate=args.lr, l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type):
+def create_model(batch_size=args.batch_size, learning_rate=args.lr, l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,beta=args.beta, gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type):
   print("==> using model {}".format(args.network))
   model_module = imp.load_source(os.path.basename(args.network), args.network)
   model = model_module.Network(**args_dict)
@@ -286,10 +286,7 @@ if args.mode == 'train':
         "epochs":[50,100],
         "learning_rate":[0.3,0.5]}
         
-        model_ = KerasClassifier(build_fn = lambda: model, learning_rate=args.lr, epochs = args.epochs, 
-                                batch_size=args.batch_size, learning_rate=args.lr, l1=args.l1, l2=args.l2, 
-                                target_repl_coef=args.target_repl_coef,gamma=args.gamma, optimizer='Adam', 
-                                beta_1=args.beta_1, loss_type=args.loss_type)
+        model_ = KerasClassifier(build_fn = create_model, verbose=0)
 
         gs = GridSearchCV(model_, params, scoring='roc_auc', 
                         refit='roc_auc', n_jobs=1, 
