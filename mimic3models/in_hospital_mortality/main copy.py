@@ -35,8 +35,6 @@ parser.add_argument('--data', type=str, help='Path to the data of in-hospital mo
                     default=os.path.join(os.path.dirname(__file__), '../../data/in-hospital-mortality/'))
 parser.add_argument('--output_dir', type=str, help='Directory relative which all output files are stored',
                     default='.')
-parser.add_argument('--cbloss', type=str, help='Use Class-Balanced Loss',
-                    default=False)
 parser.add_argument('--beta', type=float, help='beta for CBL',
                     default=0.9)
 parser.add_argument('--smote', type=str, help='oversample data',
@@ -45,8 +43,8 @@ parser.add_argument('--timewarp', type=str, help='oversample data',
                     default=False)
 parser.add_argument('--addnoise', type=str, help='oversample data',
                     default=False)
-parser.add_argument('--focal_loss', type=str, help='Use Class-Balanced Focal Loss',
-                    default=False)
+parser.add_argument('--loss_type', type=str, help='Loss-type',
+                    default='binary_crossentropy')
 parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced Focal Loss',
                     default=2.0)
 parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default=False)
@@ -164,63 +162,67 @@ else:
 
 
 # Build the model
-print("==> using model {}".format(args.network))
-model_module = imp.load_source(os.path.basename(args.network), args.network)
-model = model_module.Network(**args_dict)
-suffix = ".bs{}{}{}.ts{}{}".format(args.batch_size,
-                                   ".L1{}".format(args.l1) if args.l1 > 0 else "",
-                                   ".L2{}".format(args.l2) if args.l2 > 0 else "",
-                                   args.timestep,
-                                   ".trc{}".format(args.target_repl_coef) if args.target_repl_coef > 0 else "",
-                                   ".trc{}".format(args.beta) if args.beta > 0 else "",
-                                   ".trc{}".format(args.gamma) if args.gamma > 0 else "")
-model.final_name = args.prefix + model.say_name() + suffix
-print("==> model.final_name:", model.final_name)
+def create_model(batch_size=args.batch_size, learning_rate=args.lr, l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type):
+  print("==> using model {}".format(args.network))
+  model_module = imp.load_source(os.path.basename(args.network), args.network)
+  model = model_module.Network(**args_dict)
+  suffix = ".bs{}{}{}.ts{}{}".format(batch_size,
+                                    ".L1{}".format(l1) if l1 > 0 else "",
+                                    ".L2{}".format(l2) if l2 > 0 else "",
+                                    args.timestep,
+                                    ".trc{}".format(target_repl_coef) if target_repl_coef > 0 else "",
+                                    ".trc{}".format(beta) if beta > 0 else "",
+                                    ".trc{}".format(gamma) if gamma > 0 else "")
+  model.final_name = args.prefix + model.say_name() + suffix
+  print("==> model.final_name:", model.final_name)
 
 
-# Compile the model
-print("==> compiling the model")
-optimizer_config = {'class_name': args.optimizer,
-                    'config': {'lr': args.lr,
-                               'beta_1': args.beta_1}}
-# NOTE: one can use binary_crossentropy even for (B, T, C) shape.
-#       It will calculate binary_crossentropies for each class
-#       and then take the mean over axis=-1. Tre results is (B, T).
+  # Compile the model
+  print("==> compiling the model")
+  optimizer_config = {'class_name': optimizer,
+                      'config': {'lr': learning_rate,
+                                'beta_1': beta_1}}
+  # NOTE: one can use binary_crossentropy even for (B, T, C) shape.
+  #       It will calculate binary_crossentropies for each class
+  #       and then take the mean over axis=-1. Tre results is (B, T).
 
 
-if target_repl:
-    loss = ['binary_crossentropy'] * 2
-    loss_weights = [1 - args.target_repl_coef, args.target_repl_coef]
-elif args.cbloss:
-    print('=> using Class Balanced Binary Cross Entropy Loss \n')
-    samples_per_cls=[len(y)-sum(y),sum(y)]
-    loss = ['binary_crossentropy'] * 2
-    beta=float(args.beta)
-    effective_num = 1.0 - np.power(beta, samples_per_cls)
-    loss_weights = (1.0-beta)/np.array(effective_num)
-    loss_weights = loss_weights / np.sum(loss_weights) * 2
-elif args.focal_loss:
-    print('=> using Class Balanced Binary Focal Loss \n')
-    samples_per_cls=[len(y)-sum(y),sum(y)]
-    loss = BinaryFocalLoss(gamma=args.gamma)
-    beta=float(args.beta)
-    effective_num = 1.0 - np.power(beta, samples_per_cls)
-    loss_weights = (1.0-beta)/np.array(effective_num)
-    loss_weights = loss_weights / np.sum(loss_weights) * 2
-else:
-    print('=> using Binary Cross Entropy Loss \n')
-    loss = 'binary_crossentropy'
-    loss_weights = None
+  if target_repl:
+      loss = ['binary_crossentropy'] * 2
+      loss_weights = [1 - target_repl_coef, target_repl_coef]
+  elif loss_type =='cbloss':
+      print('=> using Class Balanced Binary Cross Entropy Loss \n')
+      samples_per_cls=[len(y)-sum(y),sum(y)]
+      loss = ['binary_crossentropy'] * 2
+      beta=float(args.beta)
+      effective_num = 1.0 - np.power(beta, samples_per_cls)
+      loss_weights = (1.0-beta)/np.array(effective_num)
+      loss_weights = loss_weights / np.sum(loss_weights) * 2
+  elif loss_type == 'focal_loss':
+      print('=> using Class Balanced Binary Focal Loss \n')
+      samples_per_cls=[len(y)-sum(y),sum(y)]
+      loss = BinaryFocalLoss(gamma=args.gamma)
+      beta=float(args.beta)
+      effective_num = 1.0 - np.power(beta, samples_per_cls)
+      loss_weights = (1.0-beta)/np.array(effective_num)
+      loss_weights = loss_weights / np.sum(loss_weights) * 2
+  else:
+      print('=> using Binary Cross Entropy Loss \n')
+      loss = 'binary_crossentropy'
+      loss_weights = None
 
-print('Loss:',loss,'\n')
+  print('Loss:',loss,'\n')
 
-optimizer=tf.keras.optimizers.Adam(lr=args.lr, beta_1=args.beta_1)
+  optimizer=tf.keras.optimizers.Adam(lr=learning_rate, beta_1=beta_1)
 
-model.compile(optimizer=optimizer,
-              loss=loss,
-              loss_weights=loss_weights)
-model.summary()
+  model.compile(optimizer=optimizer,
+                loss=loss,
+                loss_weights=loss_weights)
+  model.summary()
 
+  return model
+
+model=create_model()
 # Load model weights
 n_trained_chunks = 0
 if args.load_state != "":
@@ -245,7 +247,7 @@ if target_repl:
     val_raw = extend_labels(val_raw)
 
 if args.mode == 'train':
-
+    
     # Prepare training
     path = os.path.join(args.output_dir, 'keras_states/' + model.final_name + '.epoch{epoch}.test{val_loss}.state')
 
@@ -282,11 +284,12 @@ if args.mode == 'train':
     if args.gridsearch:
         params = {"batch_size": [8, 16, 32],
         "epochs":[50,100],
-        "lr":[0.3,0.5],
-        "dropout":[0.1,0.3,0.6],
-        "depth":[2,4]}
+        "learning_rate":[0.3,0.5]}
         
-        model_ = KerasClassifier(build_fn = lambda: model, epochs = args.epochs, batch_size = args.batch_size, verbose = args.verbose)
+        model_ = KerasClassifier(build_fn = lambda: model, learning_rate=args.lr, epochs = args.epochs, 
+                                batch_size=args.batch_size, learning_rate=args.lr, l1=args.l1, l2=args.l2, 
+                                target_repl_coef=args.target_repl_coef,gamma=args.gamma, optimizer='Adam', 
+                                beta_1=args.beta_1, loss_type=args.loss_type)
 
         gs = GridSearchCV(model_, params, scoring='roc_auc', 
                         refit='roc_auc', n_jobs=1, 
