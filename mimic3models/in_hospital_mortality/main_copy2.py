@@ -3,6 +3,7 @@ from __future__ import print_function
 from imblearn.over_sampling import SMOTE
 
 import numpy as np
+import pickle
 import argparse
 import os
 import imp
@@ -282,11 +283,15 @@ if args.mode == 'train':
         class_weights=None
 
     #GridSearch setup
-
+# batch_size=args.batch_size, batch_norm=args.batch_norm, learning_rate=args.lr, 
+#                 depth=args.depth, dim=args.dim, dropout=args.dropout,rec_dropout=args.rec_dropout,
+#                 l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,beta=args.beta, 
+#                 gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, task='ihm'
     if args.gridsearch:
-        params = {"loss_type":['focal_loss'],
-        "beta":[0.9,0.99,0.999],
-        "gamma":[0.5,1,2]}
+        params = {"learning_rate":[0.001,.01,.0001],
+        "depth":[2,4],
+        "dropout":[0,0.1,0.3,0.5],
+        "rec_dropout":[0,0.1,0.3]}
         
         model_ = KerasClassifier(build_fn = create_model, verbose=0)
         outer_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -294,6 +299,9 @@ if args.mode == 'train':
                         refit='roc_auc', n_jobs=1, 
                         cv=outer_cv, return_train_score=True )
         
+        a_file1 = open("cv_scores.pkl", "wb")
+        pickle.dump(gs.cv_results_, a_file1)
+        a_file1.close()
         gs.fit(X, y)
         print("Best Scores: ", gs.best_score_,'\n')
         print("Best Params: ", gs.best_params_,'\n')
