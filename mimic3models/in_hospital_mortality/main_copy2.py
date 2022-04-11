@@ -164,10 +164,10 @@ else:
 def create_model(batch_size=args.batch_size, batch_norm=args.batch_norm, learning_rate=args.lr, 
                 depth=args.depth, dim=args.dim, dropout=args.dropout,rec_dropout=args.rec_dropout,
                 l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,beta=args.beta, 
-                gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type):
+                gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, task='ihm'):
   print("==> using model {}".format(args.network))
   model_module = imp.load_source(os.path.basename(args.network), args.network)
-  model = model_module.Network(dim, batch_norm, dropout, rec_dropout, depth, target_repl_coef, depth, task='ihm')   
+  model = model_module.Network(dim=dim, batch_norm=batch_norm, dropout=dropout, rec_dropout=rec_dropout, target_repl_coef=target_repl_coef, depth=depth, task=task)   
   suffix = ".bs{}{}{}.ts{}{}".format(batch_size,
                                     ".L1{}".format(l1) if l1 > 0 else "",
                                     ".L2{}".format(l2) if l2 > 0 else "",
@@ -289,10 +289,10 @@ if args.mode == 'train':
         "gamma":[0.5,1,2]}
         
         model_ = KerasClassifier(build_fn = create_model, verbose=0)
-
+        outer_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         gs = GridSearchCV(model_, params, scoring='roc_auc', 
                         refit='roc_auc', n_jobs=1, 
-                        cv=2, return_train_score=True )
+                        cv=outer_cv, return_train_score=True )
         
         gs.fit(X, y)
         print("Best Scores: ", gs.best_score_,'\n')
