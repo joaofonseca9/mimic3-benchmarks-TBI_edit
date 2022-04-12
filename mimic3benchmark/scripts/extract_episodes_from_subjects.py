@@ -20,6 +20,7 @@ parser.add_argument('--variable_map_file', type=str,
 parser.add_argument('--reference_range_file', type=str,
                     default=os.path.join(os.path.dirname(__file__), '../resources/variable_ranges.csv'),
                     help='CSV containing reference ranges for VARIABLEs.')
+parser.add_argument('--added_fts', type=str, default=False, help='Add neurological features')
 args, _ = parser.parse_known_args()
 
 var_map = read_itemid_to_variable_map(args.variable_map_file)

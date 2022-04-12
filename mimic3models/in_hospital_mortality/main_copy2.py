@@ -288,10 +288,11 @@ if args.mode == 'train':
 #                 l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,beta=args.beta, 
 #                 gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, task='ihm'
     if args.gridsearch:
-        params = {"learning_rate":[0.001,.01,.0001],
-        "depth":[2,4],
-        "dropout":[0,0.1,0.3,0.5],
-        "rec_dropout":[0,0.1,0.3]}
+        params = {"learning_rate":[.01],
+        "depth":[2],
+        "dropout":[0.5],
+        "rec_dropout":[0.3],
+        "loss_type":['focal_loss','cbloss','binary_crossentropy']}
         
         model_ = KerasClassifier(build_fn = create_model, verbose=0)
         outer_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -299,12 +300,12 @@ if args.mode == 'train':
                         refit='roc_auc', n_jobs=1, 
                         cv=outer_cv, return_train_score=True )
         
-        a_file1 = open("cv_scores.pkl", "wb")
-        pickle.dump(gs.cv_results_, a_file1)
-        a_file1.close()
         gs.fit(X, y)
         print("Best Scores: ", gs.best_score_,'\n')
         print("Best Params: ", gs.best_params_,'\n')
+        a_file1 = open("cv_scores.pkl", "wb")
+        pickle.dump(gs.cv_results_, a_file1)
+        a_file1.close()
 
     else:
         model.fit(x=X,
