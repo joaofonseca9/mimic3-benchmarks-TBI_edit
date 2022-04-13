@@ -114,7 +114,7 @@ def read_itemid_to_variable_map(fn, variable_column='LEVEL2', added_fts=False):
     var_map.COUNT = var_map.COUNT.astype(int)
     var_map = var_map[(var_map[variable_column] != '') & (var_map.COUNT > 0)]
     if added_fts:
-        var_map = var_map[(var_map.STATUS == 'ready') | (var_map.STATUS == 'verify')]
+        var_map = var_map[(var_map.STATUS == 'ready') | (var_map.STATUS == 'verify' & var_map.COUNT > 65691)]
     else:
         var_map = var_map[(var_map.STATUS == 'ready')]
     var_map.ITEMID = var_map.ITEMID.astype(int)
