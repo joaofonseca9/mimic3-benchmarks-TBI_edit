@@ -23,7 +23,7 @@ parser.add_argument('--reference_range_file', type=str,
 parser.add_argument('--added_fts', type=str, default=False, help='Add neurological features')
 args, _ = parser.parse_known_args()
 
-var_map = read_itemid_to_variable_map(args.variable_map_file)
+var_map = read_itemid_to_variable_map(args.variable_map_file, added_fts=args.added_fts)
 variables = var_map.VARIABLE.unique()
 
 for subject_dir in tqdm(os.listdir(args.subjects_root_path), desc='Iterating over subjects'):
