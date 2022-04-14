@@ -1,10 +1,4 @@
-Unnamed: 0,Unnamed: 1,Neuro Drain #1 Type,verify,Unnamed: 4,223926.0,Neuro Drain #1 Type.1,Unnamed: 7,Unnamed: 8,0.0,Neurological,Unnamed: 11,Unnamed: 12,Unnamed: 13,metavision,Unnamed: 15,Text,Unnamed: 17
-,,Neuro Drain #1 Level,verify,,223930.0,Neuro Drain #1 Level,,,0.0,Neurological,,,,metavision,,Text,
-,,Neuro Drain #1 Status,verify,,223931.0,Neuro Drain #1 Status,,,0.0,Neurological,,,,metavision,,Text,
-,,Neuro Drain #1 Drainage,verify,,223932.0,Neuro Drain #1 Drainage,,,0.0,Neurological,,,,metavision,,Text,
-,,Neuro Waveform Appearance,verify,,224380.0,Neuro Waveform Appearance,,,0.0,Neurological,,,,metavision,,Text,
-,,Neuro Drain Location,verify,,224764.0,Neuro Drain Location,,,0.0,Neurological,,,,metavision,,Text,
-,,Neuro Drain HOB,verify,,224765.0,Neuro Drain Head of Bed,,,0.0,Neurological,,,,metavision,,Text,
+LEVEL2,LEVEL1,ALTERNATIVE,STATUS,STATUS NOTE,ITEMID,MIMIC LABEL,UNITNAME,LINKSTO,COUNT,CATEGORY,CONCEPTID,FLUID,LOINC_CODE,DBSOURCE,Unnamed: 15,PARAM_TYPE,NOTE
 Weight,Weight,,ignore,,581.0,Previous WeightF,,chartevents,1646896.0,,,,,carevue,,,
 Weight,Weight,,ignore,,3723.0,Birth Weight    (kg),,chartevents,435395.0,,,,,carevue,,,
 Weight,Weight,,ignore,,3583.0,Previous Weight (kg),,chartevents,416625.0,,,,,carevue,,,
@@ -128,7 +122,13 @@ Diastolic blood pressure,Diastolic blood pressure (noninvasive),NBPd,ready,,2246
 Fraction inspired oxygen,Fraction inspired oxygen,FiO2,ready,requires unit conversion or checking,727.0,Vision FiO2,,chartevents,544.0,,,,,carevue,,,
 Systolic blood pressure,Systolic blood pressure (noninvasive),NBPs,ready,,227243.0,Manual Blood Pressure Systolic Right,mmHg,chartevents,541.0,Routine Vital Signs,,,,metavision,,Numeric,
 Height,Height (in),Height (in),ready,requires unit conversion or checking,1394.0,Height Inches,,chartevents,26.0,,,,,carevue,,,
-LEVEL2,LEVEL1,ALTERNATIVE,STATUS,STATUS NOTE,ITEMID,MIMIC LABEL,UNITNAME,LINKSTO,COUNT,CATEGORY,CONCEPTID,FLUID,LOINC_CODE,DBSOURCE,,PARAM_TYPE,NOTE
+Neuro Drain #1 Type,Neuro Drain #1 Type,Neuro Drain #1 Type,verify,,223926.0,Neuro Drain #1 Type,,,0.0,Neurological,,,,metavision,,Text,
+Neuro Drain #1 Level,Neuro Drain #1 Level,Neuro Drain #1 Level,verify,,223930.0,Neuro Drain #1 Level,,,0.0,Neurological,,,,metavision,,Text,
+Neuro Drain #1 Status,Neuro Drain #1 Status,Neuro Drain #1 Status,verify,,223931.0,Neuro Drain #1 Status,,,0.0,Neurological,,,,metavision,,Text,
+Neuro Drain #1 Drainage,Neuro Drain #1 Drainage,Neuro Drain #1 Drainage,verify,,223932.0,Neuro Drain #1 Drainage,,,0.0,Neurological,,,,metavision,,Text,
+Neuro Waveform Appearance,Neuro Waveform Appearance,Neuro Waveform Appearance,verify,,224380.0,Neuro Waveform Appearance,,,0.0,Neurological,,,,metavision,,Text,
+Neuro Drain Location,Neuro Drain Location,Neuro Drain Location,verify,,224764.0,Neuro Drain Location,,,0.0,Neurological,,,,metavision,,Text,
+Neuro Drain HOB,Neuro Drain HOB,Neuro Drain HOB,verify,,224765.0,Neuro Drain Head of Bed,,,0.0,Neurological,,,,metavision,,Text,
 Urine output,Urine output (foley),,verify,,40055.0,Urine Out Foley,,outputevents,1917527.0,,,,,carevue,,,
 Urine output,Urine output (foley),,verify,,226559.0,Foley,mL,outputevents,1186717.0,Output,,,,metavision,,Numeric,
 Hematocrit,Hematocrit,HCT,verify,,51221.0,HEMATOCRIT,,labevents,881846.0,HEMATOLOGY,,BLOOD,4544-01-03 00:00:00,,,,

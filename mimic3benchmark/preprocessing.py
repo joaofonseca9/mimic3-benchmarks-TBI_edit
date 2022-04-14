@@ -109,15 +109,15 @@ def make_phenotype_label_matrix(phenotypes, stays=None):
 ###################################
 
 def read_itemid_to_variable_map(fn, variable_column='LEVEL2', added_fts=False):
-    var_map = dataframe_from_csv(fn, index_col=None).fillna('').astype(str)
+    var_map = dataframe_from_csv(fn, index_col=None, header=0).fillna('').astype(str)
     # var_map[variable_column] = var_map[variable_column].apply(lambda s: s.lower())
-    var_map.COUNT = var_map.COUNT.astype(int)
+    var_map.COUNT = var_map.COUNT.astype(float).astype(int)
     var_map = var_map[(var_map[variable_column] != '') & (var_map.COUNT > 0)]
     if added_fts:
-        var_map = var_map[(var_map.STATUS == 'ready') | (var_map.STATUS == 'verify' & var_map.COUNT > 65691)]
+        var_map = var_map[((var_map.STATUS == 'ready') | (var_map.STATUS == 'verify')) & (var_map.COUNT > 258343)]
     else:
         var_map = var_map[(var_map.STATUS == 'ready')]
-    var_map.ITEMID = var_map.ITEMID.astype(int)
+    var_map.ITEMID = var_map.ITEMID.astype(float).astype(int)
     var_map = var_map[[variable_column, 'ITEMID', 'MIMIC LABEL']].set_index('ITEMID')
     return var_map.rename({variable_column: 'VARIABLE', 'MIMIC LABEL': 'MIMIC_LABEL'}, axis=1)
 
