@@ -113,6 +113,10 @@ class InHospitalMortalityReader(Reader):
         ret = []
         with open(os.path.join(self._dataset_dir, ts_filename), "r") as tsfile:
             header = tsfile.readline().strip().split(',')
+            if header[4] == '"CO2 (ETCO2':
+              header[4] = 'CO2 (ETCO2, PCO2, etc.)'
+              header.remove(' etc.)"')
+              header.remove(' PCO2')            
             assert header[0] == "Hours"
             for line in tsfile:
                 mas = line.strip().split(',')
