@@ -259,8 +259,9 @@ def clean_height(df):
 # Potassium: one value was misimputed as '10k' instead of 10
 def clean_potassium(df):
     v = df.VALUE.copy()
-    if v=='10k':
-        v=10
+    for value in v:
+        if value =='10k':
+            value='10'
     return v
 
 
@@ -284,7 +285,8 @@ clean_fns = {
     'pH': clean_lab,
     'Temperature': clean_temperature,
     'Weight': clean_weight,
-    'Height': clean_height
+    'Height': clean_height,
+    'Potassium': clean_potassium
 }
 
 

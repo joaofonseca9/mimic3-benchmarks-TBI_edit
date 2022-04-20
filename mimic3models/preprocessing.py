@@ -10,6 +10,13 @@ import os
 from sklearn.preprocessing import OneHotEncoder 
 from sklearn.compose import ColumnTransformer
 from fancyimpute import IterativeImputer
+from sklearn.linear_model import BayesianRidge
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from warnings import simplefilter
+from sklearn.exceptions import ConvergenceWarning
+simplefilter("ignore", category=ConvergenceWarning)
 
 
 class Discretizer:
@@ -89,7 +96,7 @@ class Discretizer:
                 for pos in range(N_values):
                     data[bin_id, begin_pos[channel_id] + pos] = one_hot[pos]
             else:
-                data[bin_id, begin_pos[channel_id]] = float(value)
+                data[bin_id, begin_pos[channel_id]] = float(self._normal_values[channel])
 
         for row in X:
             t = float(row[0]) - first_time
@@ -108,6 +115,16 @@ class Discretizer:
                 if mask[bin_id][channel_id] == 1:
                     unused_data += 1
                 mask[bin_id][channel_id] = 1
+                # if row[j]=='10k':
+                #     # print('Found value ',row[j],' in channel ', channel)
+                #     row[j]='10'
+                
+                #prevent missimputed data to give an error
+                if not self._is_categorical_channel[channel]:
+                  try:
+                    value=float(row[j])
+                  except:
+                    row[j] = float(self._normal_values[channel])
 
                 write(data, bin_id, channel, row[j], begin_pos)
                 original_value[bin_id][channel_id] = row[j]
@@ -149,36 +166,24 @@ class Discretizer:
                     write(data, bin_id, channel, imputed_value, begin_pos)
         
         if self._impute_strategy == 'mice':
-
-            #Initialize MICE imputer
-            mice_imputer = IterativeImputer(max_iter=30)
+            mice_imputer = IterativeImputer(max_iter=20, random_state=42, sample_posterior=True)
             categorical=[]
-
-            #Create an array with the names of the categorical features to perform OHE 
-            # We need to do OHE before MICE since it does not support categorical features
             for chan in self._is_categorical_channel:
                 if self._is_categorical_channel[chan]:
                     categorical.append(chan)
-
-            #cat_channels: array with the size of the number of features and the possible values for each, which will be the columns after OHE
             cat_channels=list(self._possible_values.values())
             cat_channels = [x for x in cat_channels if x != []]
-
             columnTransformer = ColumnTransformer([('ohe', OneHotEncoder(categories=cat_channels,handle_unknown='ignore',sparse=False),categorical)], remainder='passthrough')
 
-            
             X_df=pd.DataFrame(X[:,1:],columns=header[1:])
             X_df[X_df==""]=np.nan
             X_ohe = columnTransformer.fit_transform(X_df)
             X_ohe=pd.DataFrame(X_ohe,columns=columnTransformer.get_feature_names_out())
-
-            # Check OHE columns with all missing values
             all_missing=[]
             for col in X_ohe:
                 if X_ohe[col].isnull().all():
                     all_missing.append(col)
-            
-            #For each of those columns, input the normal values
+
             for ft_name in self._normal_values:
                 for missing_ft in all_missing:
                     if ft_name in missing_ft:
