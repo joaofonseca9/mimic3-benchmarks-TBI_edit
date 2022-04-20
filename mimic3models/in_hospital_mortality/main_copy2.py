@@ -50,7 +50,7 @@ parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced 
                     default=2.0)
 parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default=False)
 parser.add_argument('--gridsearch', type=str, help='use Grid Search CV', default=False)                        
-
+parser.add_argument('--config_path', type=str, help='Configuration path of the features', default=os.path.join(os.path.dirname(__file__), 'resources/discretizer_config.json'))   
 args = parser.parse_args()
 print(args)
 
@@ -71,7 +71,8 @@ val_reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, 'trai
 discretizer = Discretizer(timestep=float(args.timestep),
                           store_masks=True,
                           impute_strategy=args.imputation,
-                          start_time='zero')
+                          start_time='zero',
+                          config_path=args.config_path)
 
 discretizer_header = discretizer.transform(train_reader.read_example(0)["X"])[1].split(',')
 cont_channels = [i for (i, x) in enumerate(discretizer_header) if x.find("->") == -1]
