@@ -149,24 +149,36 @@ class Discretizer:
                     write(data, bin_id, channel, imputed_value, begin_pos)
         
         if self._impute_strategy == 'mice':
-            mice_imputer = IterativeImputer(max_iter=20)
+
+            #Initialize MICE imputer
+            mice_imputer = IterativeImputer(max_iter=30)
             categorical=[]
+
+            #Create an array with the names of the categorical features to perform OHE 
+            # We need to do OHE before MICE since it does not support categorical features
             for chan in self._is_categorical_channel:
                 if self._is_categorical_channel[chan]:
                     categorical.append(chan)
+
+            #cat_channels: array with the size of the number of features and the possible values for each, which will be the columns after OHE
             cat_channels=list(self._possible_values.values())
             cat_channels = [x for x in cat_channels if x != []]
+
             columnTransformer = ColumnTransformer([('ohe', OneHotEncoder(categories=cat_channels,handle_unknown='ignore',sparse=False),categorical)], remainder='passthrough')
 
+            
             X_df=pd.DataFrame(X[:,1:],columns=header[1:])
             X_df[X_df==""]=np.nan
             X_ohe = columnTransformer.fit_transform(X_df)
             X_ohe=pd.DataFrame(X_ohe,columns=columnTransformer.get_feature_names_out())
+
+            # Check OHE columns with all missing values
             all_missing=[]
             for col in X_ohe:
                 if X_ohe[col].isnull().all():
                     all_missing.append(col)
-
+            
+            #For each of those columns, input the normal values
             for ft_name in self._normal_values:
                 for missing_ft in all_missing:
                     if ft_name in missing_ft:
