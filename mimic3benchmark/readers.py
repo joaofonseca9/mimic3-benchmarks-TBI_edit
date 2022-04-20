@@ -119,6 +119,8 @@ class InHospitalMortalityReader(Reader):
               header.remove(' PCO2')            
             assert header[0] == "Hours"
             for line in tsfile:
+                if 'ERROR' in line:
+                  continue
                 mas = line.strip().split(',')
                 ret.append(np.array(mas))
         return (np.stack(ret), header)
