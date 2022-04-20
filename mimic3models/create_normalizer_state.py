@@ -37,7 +37,7 @@ def main():
                         default='.')
     parser.add_argument('--data', type=str, required=True, help='Path to the task data.')
     parser.set_defaults(store_masks=True)
-
+    parser.add_argument('--config_path', type=str, required=True, help='Path to the discretizer config.')
     args = parser.parse_args()
     print(args)
 
@@ -59,7 +59,8 @@ def main():
     discretizer = Discretizer(timestep=args.timestep,
                               store_masks=args.store_masks,
                               impute_strategy=args.impute_strategy,
-                              start_time=args.start_time)
+                              start_time=args.start_time,
+                              config_path=args.config_path)
     discretizer_header = reader.read_example(0)['header']
     continuous_channels = [i for (i, x) in enumerate(discretizer_header) if x.find("->") == -1]
 

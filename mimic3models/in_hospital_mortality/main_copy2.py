@@ -75,6 +75,10 @@ discretizer = Discretizer(timestep=float(args.timestep),
                           config_path=args.config_path)
 
 discretizer_header = discretizer.transform(train_reader.read_example(0)["X"])[1].split(',')
+if discretizer_header[3] == 'CO2 (ETCO2':
+              discretizer_header[4] = 'CO2 (ETCO2, PCO2, etc.)'
+              discretizer_header.remove(' etc.)')
+              discretizer_header.remove(' PCO2') 
 cont_channels = [i for (i, x) in enumerate(discretizer_header) if x.find("->") == -1]
 
 
