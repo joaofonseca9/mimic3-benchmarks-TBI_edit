@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
+import math
 import platform
 import pickle
 import json
@@ -96,7 +97,7 @@ class Discretizer:
                 for pos in range(N_values):
                     data[bin_id, begin_pos[channel_id] + pos] = one_hot[pos]
             else:
-                data[bin_id, begin_pos[channel_id]] = float(self._normal_values[channel])
+                data[bin_id, begin_pos[channel_id]] = float(value)
 
         for row in X:
             t = float(row[0]) - first_time
@@ -264,8 +265,12 @@ class Normalizer:
         with open(save_file_path, "wb") as save_file:
             N = self._count
             self._means = 1.0 / N * self._sum_x
+            # print(self._means)
             self._stds = np.sqrt(1.0/(N - 1) * (self._sum_sq_x - 2.0 * self._sum_x * self._means + N * self._means**2))
+            # print(self._stds)
             self._stds[self._stds < eps] = eps
+            self._stds=np.nan_to_num(self._stds, nan=eps)
+            print(self._stds)
             pickle.dump(obj={'means': self._means,
                              'stds': self._stds},
                         file=save_file,
@@ -288,4 +293,4 @@ class Normalizer:
         ret = 1.0 * X
         for col in fields:
             ret[:, col] = (X[:, col] - self._means[col]) / self._stds[col]
-        return ret
+        return ret  
