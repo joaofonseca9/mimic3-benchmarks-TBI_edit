@@ -45,7 +45,9 @@ def main():
     reader = None
     dataset_dir = os.path.join(args.data, 'train')
     if args.task == 'ihm':
-        reader = InHospitalMortalityReader(dataset_dir=dataset_dir, period_length=48.0)
+        reader = InHospitalMortalityReader(dataset_dir=os.path.join(args.data, 'train'),
+                                         listfile=os.path.join(args.data, 'train_listfile.csv'),
+                                         period_length=48.0)
     if args.task == 'decomp':
         reader = DecompensationReader(dataset_dir=dataset_dir)
     if args.task == 'los':
@@ -80,7 +82,7 @@ def main():
         normalizer._feed_data(data)
     print('\n')
 
-    file_name = '{}_ts:{:.2f}_impute:{}_start:{}_masks:{}_n:{}.normalizer'.format(
+    file_name = '{}_ts_{:.2f}_impute_{}_start_{}_masks_{}_n:{}.normalizer'.format(
         args.task, args.timestep, args.impute_strategy, args.start_time, args.store_masks, n_samples)
     file_name = os.path.join(args.output_dir, file_name)
     print('Saving the state in {} ...'.format(file_name))

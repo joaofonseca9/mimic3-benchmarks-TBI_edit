@@ -21,7 +21,7 @@ def load_data(reader, discretizer, normalizer, small_part=False, return_names=Fa
     print('discretized data example', data[0][0],'\nshape:',np.shape(data))
     
     if normalizer is not None:
-        datsadasa = [normalizer.transform(X) for X in data]
+        data = [normalizer.transform(X) for X in data]
     
     print('normalized data example', data[0][0],'\nshape:',np.shape(data))
     whole_data = (np.array(data), np.array(labels))
