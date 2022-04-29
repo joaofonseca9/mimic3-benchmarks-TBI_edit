@@ -310,7 +310,7 @@ if args.mode == 'train':
     # Prepare training
     path = os.path.join(args.output_dir, 'keras_states/' + model.final_name + '.epoch{epoch}.test{val_loss}.state')
     train_raw=[X,y]
-    val_raw=[X_val,val_raw[1]]
+    
     metrics_callback = keras_utils.InHospitalMortalityMetrics(train_data=train_raw,
                                                               val_data=val_raw,
                                                               target_repl=(args.target_repl_coef > 0),
