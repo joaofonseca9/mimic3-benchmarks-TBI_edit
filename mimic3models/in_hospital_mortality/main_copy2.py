@@ -3,6 +3,7 @@ from __future__ import print_function
 from imblearn.over_sampling import SMOTE
 
 import numpy as np
+import pandas as pd
 import pickle
 import argparse
 import os
@@ -29,6 +30,9 @@ from focal_loss import BinaryFocalLoss
 
 import tsaug
 
+from tsfresh import extract_features, select_features, extract_relevant_features
+from tsfresh.feature_selection.relevance import calculate_relevance_table
+
 parser = argparse.ArgumentParser()
 common_utils.add_common_arguments(parser)
 parser.add_argument('--target_repl_coef', type=float, default=0.0)
@@ -49,7 +53,8 @@ parser.add_argument('--loss_type', type=str, help='Loss-type',
 parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced Focal Loss',
                     default=2.0)
 parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default=False)
-parser.add_argument('--gridsearch', type=str, help='use Grid Search CV', default=False)                        
+parser.add_argument('--gridsearch', type=str, help='use Grid Search CV', default=False)
+parser.add_argument('--ft_selection', type=str, help='Do feature selection', default=False)                        
 parser.add_argument('--config_path', type=str, help='Configuration path of the features', default=os.path.join(os.path.dirname(__file__), 'resources/discretizer_config.json'))   
 args = parser.parse_args()
 print(args)
@@ -102,6 +107,35 @@ train_raw = utils.load_data(train_reader, discretizer, normalizer, args.small_pa
 val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
 X=train_raw[0]
 y=train_raw[1]
+
+if args.ft_selection:
+    n_samples=X.shape[0]
+    n_bins=X.shape[1]
+    y_df=np.zeros(n_samples*n_bins)
+    for i in range(0,n_samples):
+        x=pd.DataFrame(X[i], columns=discretizer_header)
+        x['id']=i
+        y_df[i*n_bins-48:i*n_bins]=y[i]
+        if i==0:
+            x_df=x.copy()
+        else:
+            x_df = pd.concat([x_df,x], axis=0)
+
+    y_df=pd.Series(y_df)
+    x_df.index=x_df['id']
+    y_df.index=x_df['id']
+    x_df.drop(columns=['id'])
+    # print relevant fts
+    rel_table=calculate_relevance_table(x_df,y_df)
+    print('=> Relevant Features:', len(rel_table[rel_table.relevant==True]['feature']),'\n', rel_table[rel_table.relevant==True]['feature'])
+    X_selected = select_features(x_df, y_df)
+    X_list=[]
+
+    for i in X_selected['id'].unique():
+        X_list.append(np.array(X_selected[X_selected.index==i]))
+    X=np.concatenate(X_list).reshape((n_samples,n_bins,X_list.shape[1]))
+    print('=> shape after feature selection ', X.shape)
+
 
 # Oversample
 if args.smote:
