@@ -108,35 +108,52 @@ val_raw = utils.load_data(val_reader, discretizer, normalizer, args.small_part)
 X=train_raw[0]
 y=train_raw[1]
 
-if args.ft_selection:
-    n_samples=X.shape[0]
-    n_bins=X.shape[1]
-    y_df=np.zeros(n_samples*n_bins)
-    for i in range(0,n_samples):
-        x=pd.DataFrame(X[i], columns=discretizer_header)
-        x['id']=i
-        y_df[i*n_bins-48:i*n_bins]=y[i]
-        if i==0:
-            x_df=x.copy()
-        else:
-            x_df = pd.concat([x_df,x], axis=0)
 
-    y_df=pd.Series(y_df)
-    x_df.index=x_df['id']
-    y_df.index=x_df['id']
-    x_df.drop(columns=['id'])
-    # print relevant fts
-    rel_table=calculate_relevance_table(x_df,y_df)
+def select_fts(X,y, print_final=True):
+  n_samples=X.shape[0]
+  n_bins=X.shape[1]
+  y_df=np.zeros(n_samples*n_bins)
+  for i in range(0,n_samples):
+      x=pd.DataFrame(X[i], columns=discretizer_header)
+      x['id']=i
+      y_df[i*n_bins-48:i*n_bins]=y[i]
+      if i==0:
+          x_df=x.copy()
+      else:
+          x_df = pd.concat([x_df,x], axis=0)
+
+  y_df=pd.Series(y_df)
+  x_df.index=x_df['id']
+  y_df.index=x_df['id']
+  x_df=x_df.drop(columns=['id'])
+  # print relevant fts
+  rel_table=calculate_relevance_table(x_df,y_df)
+  if print_final:
     print('=> Relevant Features:', len(rel_table[rel_table.relevant==True]['feature']),'\n', rel_table[rel_table.relevant==True]['feature'])
-    X_selected = select_features(x_df, y_df)
-    X_list=[]
+  
+  #Select fts
+  X_selected = select_features(x_df, y_df)
+  X_list=[]
 
-    for i in X_selected['id'].unique():
-        X_list.append(np.array(X_selected[X_selected.index==i]))
-    X=np.concatenate(X_list).reshape((n_samples,n_bins,X_list.shape[1]))
-    print('=> shape after feature selection ', X.shape)
+  for i in X_selected.index.unique():
+      X_list.append(np.array(X_selected[X_selected.index==i]))
+  X=np.concatenate(X_list).reshape((n_samples,n_bins,X_list[0].shape[1]))
+  print('=> shape after feature selection ', X.shape)
 
+  return X, rel_table
 
+if args.ft_selection:
+  #feature selection for training set
+  X, rel_table = select_fts(X,y,print_final= True)
+
+  #select the same features in the validation set
+  val_raw_list=[]
+  for i in range(0,len(val_raw[0])):
+    x_df=pd.DataFrame(val_raw[0][i], columns=discretizer_header)
+    x_df=x_df[rel_table[rel_table.relevant==True]['feature']]
+    val_raw_list.append(np.array(x_df))
+  X_val=np.concatenate(val_raw_list).reshape((len(val_raw[0]),48,val_raw_list[0].shape[1]))
+  val_raw=[X_val,val_raw[1]]
 # Oversample
 if args.smote:
     print("=> Oversampling with SMOTE\n")
@@ -292,7 +309,8 @@ if args.mode == 'train':
     
     # Prepare training
     path = os.path.join(args.output_dir, 'keras_states/' + model.final_name + '.epoch{epoch}.test{val_loss}.state')
-
+    train_raw=[X,y]
+    val_raw=[X_val,val_raw[1]]
     metrics_callback = keras_utils.InHospitalMortalityMetrics(train_data=train_raw,
                                                               val_data=val_raw,
                                                               target_repl=(args.target_repl_coef > 0),
@@ -345,8 +363,10 @@ if args.mode == 'train':
         a_file1 = open("cv_scores.pkl", "wb")
         pickle.dump(gs.cv_results_, a_file1)
         a_file1.close()
-
     else:
+        print(X.shape)
+        print(y.shape)
+        print(val_raw[0].shape)
         model.fit(x=X,
                 y=y,
                 validation_data=val_raw,
