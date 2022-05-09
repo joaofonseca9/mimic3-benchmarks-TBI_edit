@@ -144,7 +144,7 @@ def select_fts(X,y, print_final=True):
 
 if args.ft_selection:
   #feature selection for training set
-  X, rel_table = select_fts(X,y,print_final= True)
+  X, rel_table = select_fts(X,y,print_final = True)
 
   #select the same features in the validation set
   val_raw_list=[]
@@ -154,6 +154,10 @@ if args.ft_selection:
     val_raw_list.append(np.array(x_df))
   X_val=np.concatenate(val_raw_list).reshape((len(val_raw[0]),48,val_raw_list[0].shape[1]))
   val_raw=[X_val,val_raw[1]]
+
+  train_raw=[X,y]
+
+
 # Oversample
 if args.smote:
     print("=> Oversampling with SMOTE\n")
@@ -395,6 +399,17 @@ elif args.mode == 'test':
     data = ret["data"][0]
     labels = ret["data"][1]
     names = ret["names"]
+
+    if args.ft_selection:
+        #select the same features in the test set
+        test_raw_list=[]
+        for i in range(0,len(data)):
+          x_df=pd.DataFrame(data[i], columns=discretizer_header)
+          x_df=x_df[rel_table[rel_table.relevant==True]['feature']]
+          test_raw_list.append(np.array(x_df))
+        data=np.concatenate(test_raw_list).reshape((len(data),48,test_raw_list[0].shape[1]))
+
+
 
     predictions = model.predict(data, batch_size=args.batch_size, verbose=1)
     predictions = np.array(predictions)[:, 0]
