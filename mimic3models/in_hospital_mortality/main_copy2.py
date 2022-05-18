@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from imblearn.over_sampling import SMOTE
 
-import keras_tuner
+# import keras_tuner
 import numpy as np
 import pandas as pd
 import pickle
@@ -350,27 +350,31 @@ if args.mode == 'train':
 #                 l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,beta=args.beta, 
 #                 gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, task='ihm'
     if args.gridsearch:
-        params = {"learning_rate":[.01,.001,.0001],
-        "depth":[2,4,6],
-        "dropout":[0,0.3,0.5],
-        "rec_dropout":[0,0.3],
-        "loss_type":['focal_loss','cbloss','binary_crossentropy']}
+        params = {"learning_rate":[.001],
+        "depth":[2],
+        "dropout":[0.5,1],
+        "rec_dropout":[0.3],
+        "gamma":[0.5, 1, 2],
+        "beta":[0.9,0.99,0.999],
+        "loss_type":['focal_loss','cbloss'],
+        "epochs":[20,40]}
         
         model_ = KerasClassifier(build_fn = create_model, verbose=0)
         outer_cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
         gs = GridSearchCV(model_, params, scoring='roc_auc', 
                         refit='roc_auc', n_jobs=1, 
-                        cv=outer_cv, return_train_score=True )
+                        cv=outer_cv, return_train_score=True,verbose=3)
         
-        gs.fit(X, 
-                y,
-                epochs=n_trained_chunks + args.epochs,
-                initial_epoch=n_trained_chunks,
-                callbacks=[metrics_callback, saver, csv_logger],
-                shuffle=True,
-                verbose=3,
-                batch_size=args.batch_size,
-                class_weight=class_weights)
+        gs.fit(x=X, 
+              y=y,
+              validation_data=val_raw,
+              epochs=n_trained_chunks + args.epochs,
+              initial_epoch=n_trained_chunks,
+              callbacks=[metrics_callback, saver, csv_logger],
+              shuffle=True,
+              verbose=3,
+              batch_size=args.batch_size,
+              class_weight=class_weights)
         print("Best Scores: ", gs.best_score_,'\n')
         print("Best Params: ", gs.best_params_,'\n')
         a_file1 = open("cv_scores.pkl", "wb")
