@@ -365,7 +365,7 @@ if args.mode == 'train':
                         refit='roc_auc', n_jobs=1, 
                         cv=outer_cv, return_train_score=True,verbose=3)
         
-        gs.fit(x=X, 
+        gs.fit(X=X, 
               y=y,
               validation_data=val_raw,
               epochs=n_trained_chunks + args.epochs,
