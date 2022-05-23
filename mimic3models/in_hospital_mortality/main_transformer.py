@@ -231,13 +231,13 @@ elif args.addnoise:
 else:
     print("=> No oversampling\n")
 
-
 def create_model(input_dim=X.shape[2],batch_size=args.batch_size, batch_norm=args.batch_norm, learning_rate=args.lr, 
-                depth=args.depth, dim=args.dim, dropout=args.dropout,mlp_dropout=args.rec_dropout,
+                depth=args.depth, dim=args.dim, dropout=args.dropout,
                 l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,beta=args.beta, 
-                gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, task='ihm', num_heads=4,head_size=256):
+                gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, task='ihm', mlp_units=128,ff_dim=4,num_heads=2,head_size=128, mlp_dropout=0.4):
   print("==> using model {}".format('Transformer'))
-  model=build_transformer_model(input_shape=X.shape, head_size=head_size, num_heads=num_heads, ff_dim=args.dim, num_transformer_blocks, mlp_units, dropout=0,mlp_dropout=0)
+  print("X.shape:",X.shape)
+  model=build_transformer_model(input_shape=X.shape[1:], head_size=head_size, num_heads=num_heads, num_transformer_blocks=depth, mlp_units=[mlp_units], ff_dim=ff_dim, dropout=dropout,mlp_dropout=mlp_dropout)
 #   model_module = imp.load_source(os.path.basename(args.network), args.network)
 #   model = model_module.Network(input_dim=input_dim,dim=dim, batch_norm=batch_norm, dropout=dropout, rec_dropout=rec_dropout, target_repl_coef=target_repl_coef, depth=depth, task=task)   
   suffix = ".bs{}{}{}.ts{}{}".format(batch_size,
@@ -296,7 +296,13 @@ def create_model(input_dim=X.shape[2],batch_size=args.batch_size, batch_norm=arg
 
   return model
 
-model=create_model()
+model=create_model(head_size=256,
+    num_heads=4,
+    ff_dim=4,
+    depth=4,
+    mlp_units=128,
+    mlp_dropout=0.4,
+    dropout=0.25)
 # Load model weights
 n_trained_chunks = 0
 if args.load_state != "":
