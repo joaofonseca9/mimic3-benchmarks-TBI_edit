@@ -296,13 +296,13 @@ def create_model(input_dim=X.shape[2],batch_size=args.batch_size, batch_norm=arg
 
   return model
 
-model=create_model(head_size=256,
+model=create_model(head_size=128,
     num_heads=4,
-    ff_dim=4,
-    depth=4,
-    mlp_units=128,
-    mlp_dropout=0.4,
-    dropout=0.25)
+    ff_dim=2,
+    depth=2,
+    mlp_units=64,
+    mlp_dropout=0.6,
+    dropout=0.5)
 # Load model weights
 n_trained_chunks = 0
 if args.load_state != "":
