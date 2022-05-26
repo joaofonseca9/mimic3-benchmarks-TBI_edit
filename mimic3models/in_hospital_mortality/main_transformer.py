@@ -33,7 +33,7 @@ from mimic3models import common_utils
 
 from keras.wrappers.scikit_learn import KerasClassifier
 
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, RandomizedSearchCV
 
 from keras.callbacks import ModelCheckpoint, CSVLogger
 from focal_loss import BinaryFocalLoss

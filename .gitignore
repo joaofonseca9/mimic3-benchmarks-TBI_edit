@@ -96,3 +96,4 @@ ENV/
 # States of models
 keras_states/
 states/
+*.zip
