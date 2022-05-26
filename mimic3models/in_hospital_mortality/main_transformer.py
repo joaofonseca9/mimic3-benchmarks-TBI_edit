@@ -62,6 +62,16 @@ parser.add_argument('--loss_type', type=str, help='Loss-type',
                     default='binary_crossentropy')
 parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced Focal Loss',
                     default=2.0)
+parser.add_argument('--mlp_dropout', type=float, help='Dropout for dense layer',
+                    default=0.9)
+parser.add_argument('--num_heads', type=float, help='Number of heads in multihead attention',
+                    default=4)
+parser.add_argument('--head_size', type=float, help='Number of neurons in each head in multihead attention',
+                    default=128)
+parser.add_argument('--mlp_units', type=float, help='Number of neurons in final dense layers ',
+                    default=64)
+parser.add_argument('--ff_dim', type=float, help='Number of filters in convolution',
+                    default=2)
 parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default=False)
 parser.add_argument('--gridsearch', type=str, help='use Grid Search CV', default=False)
 parser.add_argument('--ft_selection', type=str, help='Do feature selection', default=False)                        
@@ -234,7 +244,7 @@ else:
 def create_model(input_dim=X.shape[2],batch_size=args.batch_size, batch_norm=args.batch_norm, learning_rate=args.lr, 
                 depth=args.depth, dim=args.dim, dropout=args.dropout,
                 l1=args.l1, l2=args.l2, target_repl_coef=args.target_repl_coef,beta=args.beta, 
-                gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, task='ihm', mlp_units=128,ff_dim=4,num_heads=2,head_size=128, mlp_dropout=0.4):
+                gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, mlp_units=args.mlp_units,num_heads=args.num_heads,head_size=args.head_size, mlp_dropout=args.mlp_dropout, ff_dim=args.ff_dim, task='ihm'):
   print("==> using model {}".format('Transformer'))
   print("X.shape:",X.shape)
   model=build_transformer_model(input_shape=X.shape[1:], head_size=head_size, num_heads=num_heads, num_transformer_blocks=depth, mlp_units=[mlp_units], ff_dim=ff_dim, dropout=dropout,mlp_dropout=mlp_dropout)
