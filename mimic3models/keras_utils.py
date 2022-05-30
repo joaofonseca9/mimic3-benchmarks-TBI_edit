@@ -117,6 +117,9 @@ class InHospitalMortalityMetrics(keras.callbacks.Callback):
                 self.model.stop_training = True
                 print('Best Epoch ', best_epoch, ' with ROC-AUC ', max_auc)
 
+            if epoch==99:
+                print('Best Epoch:', best_epoch)
+
 
 class PhenotypingMetrics(keras.callbacks.Callback):
     def __init__(self, train_data_gen, val_data_gen, batch_size=32,
