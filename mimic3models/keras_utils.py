@@ -115,7 +115,7 @@ class InHospitalMortalityMetrics(keras.callbacks.Callback):
             cur_auc = self.val_history[-1]["auroc"]
             if max_auc > 0.85 and cur_auc < 0.82:
                 self.model.stop_training = True
-                print('Best Epoch:', best_epoch)
+                print('Best Epoch ', best_epoch, ' with ROC-AUC ', max_auc)
 
 
 class PhenotypingMetrics(keras.callbacks.Callback):
