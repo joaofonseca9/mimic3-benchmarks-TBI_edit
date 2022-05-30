@@ -64,13 +64,13 @@ parser.add_argument('--gamma', type=float, help='Gamma value for Class-Balanced 
                     default=2.0)
 parser.add_argument('--mlp_dropout', type=float, help='Dropout for dense layer',
                     default=0.9)
-parser.add_argument('--num_heads', type=float, help='Number of heads in multihead attention',
+parser.add_argument('--num_heads', type=int, help='Number of heads in multihead attention',
                     default=4)
-parser.add_argument('--head_size', type=float, help='Number of neurons in each head in multihead attention',
+parser.add_argument('--head_size', type=int, help='Number of neurons in each head in multihead attention',
                     default=128)
-parser.add_argument('--mlp_units', type=float, help='Number of neurons in final dense layers ',
+parser.add_argument('--mlp_units', type=int, help='Number of neurons in final dense layers ',
                     default=64)
-parser.add_argument('--ff_dim', type=float, help='Number of filters in convolution',
+parser.add_argument('--ff_dim', type=int, help='Number of filters in convolution',
                     default=2)
 parser.add_argument('--class_weight', type=str, help='Class weights for model fit', default=False)
 parser.add_argument('--gridsearch', type=str, help='use Grid Search CV', default=False)
@@ -247,6 +247,7 @@ def create_model(input_dim=X.shape[2],batch_size=args.batch_size, batch_norm=arg
                 gamma=args.gamma, optimizer=args.optimizer, beta_1=args.beta_1, loss_type=args.loss_type, mlp_units=args.mlp_units,num_heads=args.num_heads,head_size=args.head_size, mlp_dropout=args.mlp_dropout, ff_dim=args.ff_dim, task='ihm'):
   print("==> using model {}".format('Transformer'))
   print("X.shape:",X.shape)
+  print("depth:",depth)
   model=build_transformer_model(input_shape=X.shape[1:], head_size=head_size, num_heads=num_heads, num_transformer_blocks=depth, mlp_units=[mlp_units], ff_dim=ff_dim, dropout=dropout,mlp_dropout=mlp_dropout)
 #   model_module = imp.load_source(os.path.basename(args.network), args.network)
 #   model = model_module.Network(input_dim=input_dim,dim=dim, batch_norm=batch_norm, dropout=dropout, rec_dropout=rec_dropout, target_repl_coef=target_repl_coef, depth=depth, task=task)   
@@ -306,13 +307,7 @@ def create_model(input_dim=X.shape[2],batch_size=args.batch_size, batch_norm=arg
 
   return model
 
-model=create_model(head_size=128,
-    num_heads=4,
-    ff_dim=2,
-    depth=2,
-    mlp_units=64,
-    mlp_dropout=0.6,
-    dropout=0.5)
+model=create_model()
 # Load model weights
 n_trained_chunks = 0
 if args.load_state != "":
