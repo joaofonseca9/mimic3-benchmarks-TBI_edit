@@ -112,7 +112,7 @@ class InHospitalMortalityMetrics(keras.callbacks.Callback):
         if self.early_stopping:
             max_auc = np.max([x["auroc"] for x in self.val_history])
             cur_auc = self.val_history[-1]["auroc"]
-            if max_auc > 0.85 and cur_auc < 0.83 and epoch >=25:
+            if max_auc > 0.85 and cur_auc < 0.82:
                 self.model.stop_training = True
 
 
