@@ -111,13 +111,14 @@ class InHospitalMortalityMetrics(keras.callbacks.Callback):
 
         if self.early_stopping:
             max_auc = np.max([x["auroc"] for x in self.val_history])
-            best_epoch=np.argmax([x["auroc"] for x in self.val_history])+1
             cur_auc = self.val_history[-1]["auroc"]
             if max_auc > 0.85 and cur_auc < 0.82 and epoch>10:
+                best_epoch=np.argmax([x["auroc"] for x in self.val_history[-10]])+1
                 self.model.stop_training = True
                 print('Best Epoch ', best_epoch, ' with ROC-AUC ', max_auc)
 
             if epoch==99:
+                best_epoch=np.argmax([x["auroc"] for x in self.val_history[-10]])+1
                 print('Best Epoch:', best_epoch)
 
 
