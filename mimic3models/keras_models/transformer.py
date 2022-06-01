@@ -13,8 +13,8 @@ def transformer_encoder(inputs, head_size, num_heads, ff_dim, dropout=0):
 
     # Feed Forward Part
     x = layers.LayerNormalization(epsilon=1e-6)(res)
-    x = layers.Conv1D(filters=ff_dim, kernel_size=1, activation="tanh")(x)
-    x = layers.Dropout(dropout)(x)
+    # x = layers.Conv1D(filters=ff_dim, kernel_size=1, activation="tanh")(x)
+    # x = layers.Dropout(dropout)(x)
     x = layers.Conv1D(filters=inputs.shape[-1], kernel_size=1)(x)
     return x + res
 
