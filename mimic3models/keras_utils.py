@@ -118,16 +118,16 @@ class InHospitalMortalityMetrics(keras.callbacks.Callback):
                 print('Best Epoch ', best_epoch, ' with ROC-AUC ', max_auc,'\n')
                 best_epochs=np.array([x["auroc"] for x in self.val_history])
                 ind = np.argpartition(best_epochs, -5)[-5:]
-                top5 = best_epochs[ind]
-                print('Best Epochs ', top5)
+                top5 = ind
+                print('Best Epochs ', top5+1, ' with AUC ', best_epochs[top5])
 
             if epoch==99:
                 best_epoch=np.argmax([x["auroc"] for x in self.val_history])+1
                 print('Best Epoch:', best_epoch)
                 best_epochs=np.array([x["auroc"] for x in self.val_history])
                 ind = np.argpartition(best_epochs, -5)[-5:]
-                top5 = best_epochs[ind]
-                print('Best Epochs ', top5)
+                top5 = ind
+                print('Best Epochs ', top5+1, ' with AUC ', best_epochs[top5])
 
 
 class PhenotypingMetrics(keras.callbacks.Callback):
